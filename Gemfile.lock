@@ -393,7 +393,6 @@ GEM
     unf_ext (0.0.7.6)
     uuidtools (2.1.5)
     xml-simple (1.1.5)
-    yard (0.9.20)
     zeitwerk (2.1.10)
 
 PLATFORMS
@@ -433,7 +432,6 @@ DEPENDENCIES
   ruby-prof
   solr_wrapper
   stanford-mods
-  yard
 
 BUNDLED WITH
    2.0.1

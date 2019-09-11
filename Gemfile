@@ -29,7 +29,6 @@ gem 'stanford-mods'
 
 group :test do
   gem 'rspec', '~> 3.0'
-  gem 'yard'
   gem 'solr_wrapper'
   gem 'jettywrapper'
   gem 'coveralls', require: false
