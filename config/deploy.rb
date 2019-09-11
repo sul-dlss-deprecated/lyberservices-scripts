@@ -1,5 +1,5 @@
-set :application, 'pre-assembly'
-set :repo_url, 'https://github.com/sul-dlss/pre-assembly.git'
+set :application, 'lyberservices-scripts'
+set :repo_url, 'https://github.com/sul-dlss/lyberservices-scripts.git'
 
 set :ssh_options, {
   keys: [Capistrano::OneTimeKey.temporary_ssh_private_key_path],
@@ -7,11 +7,11 @@ set :ssh_options, {
   auth_methods: %w(publickey password)
 }
 
-# Default branch is :v3-legacy
-set :branch, 'v3-legacy'
+# Default branch is :master
+# set :branch, 'master'
 
 # Default deploy_to directory is /var/www/my_app
-set :deploy_to, '/home/lyberadmin/pre-assembly'
+set :deploy_to, '/home/lyberadmin/lyberservices-scripts'
 
 # Default value for :scm is :git
 # set :scm, :git
