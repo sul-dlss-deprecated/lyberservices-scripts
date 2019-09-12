@@ -1,24 +1,35 @@
-# Pre-assembly
+# Lyberservices Scripts
 
 [![Build Status](https://travis-ci.org/sul-dlss/lyberservices-scripts.svg?branch=master)](https://travis-ci.org/sul-dlss/lyberservices-scripts)
 [![Coverage Status](https://coveralls.io/repos/github/sul-dlss/lyberservices-scripts/badge.svg?branch=master)](https://coveralls.io/github/sul-dlss/lyberservices-scripts?branch=master)
 
-This is a Ruby implementation of services needed to prepare objects to be
-assembled and then accessioned into the SUL digital library.
+A collection of Ruby scripts that may need access to
+- objects before pre-assembly (thumper, smpl drives)
+- dor workspaces (SDR objects before accessioning)
+- stacks
+- web-archiving-stacks
+- preservation storage roots
 
-To check which version is running, cd into the home directory of the project
-and look at the VERSION file:
+These scripts are used by a small number of power users in the PSM group (Peter, for one.)
 
-    cd /home/lyberadmin/pre-assembly/current
-    more VERSION
+Note that we hope to retire this repo:
+- if you are writing a new script, please surface it in #dlss-infrastructure channel to see if there is a different way to get the desired result, without adding to our maintenance burden.
 
-## Project Location
+This code was in the pre-assembly repo before pre-assembly became a Rails app.
+It was in the v3-legacy branch of pre-assembly.
 
-The code is deployed onto sul-lyberservices-test and sul-lyberservices-prod in
-the `/home/lyberadmin/pre-assembly` with the latest version in the "current"
-subdirectory.
+## Deployment
+
+Regular capistrano deployment:
+
+```bash
+cap stage deploy # for lyberservices-test
+cap prod deploy # for lyberservices-prod
+```
 
 ## Running
+
+0.  If you can, run your job via preassembly app: https://sul-preassembly-prod.stanford.edu/ instead of using these scripts.
 
 1.  Gather information about your project, including:
     *   The location of the materials.  You will need read access to this
@@ -46,11 +57,11 @@ subdirectory.
     above. Store this file in a location where it can be accessed by the
     server (test or production). You should create a YAML file for each
     environment specifying the parameters as appropriate. Use the convention
-    of "projectname_environment.yaml", e.g. "revs_test.yaml". If you have
+    of `projectname_environment.yaml`, e.g. `revs_test.yaml`. If you have
     multiple collections to associate your objects with, you will need to run
     in multiple batches with multiple YAML files. You can add your collection
     name to the end of each YAML filename to keep track (e.g.
-    "revs_test_craig.yaml")
+    `revs_test_craig.yaml`)
 
     The YAML file can be stored anywhere that is accessible to the server you
     are running the code on. However, for simplicity, we recommend you store
@@ -62,11 +73,11 @@ subdirectory.
 
     Example:
 
-    *   Your content is on /thumpers/dpgthumper-staing/Hummel
+    *   Your content is on `/thumpers/dpgthumper-staing/Hummel`
     *   Create a YAML file at
-        /thumpers/dpgthumper-staging/Hummel/hummel_test.yaml
+        `/thumpers/dpgthumper-staging/Hummel/hummel_test.yaml`
     *   Move your content (if you can) into
-        /thumpers/dpgthumper-staging/Hummel/content
+        `/thumpers/dpgthumper-staging/Hummel/content`
 
 
     If you cannot move your content, be sure your YAML bundle discovery glob
@@ -74,13 +85,12 @@ subdirectory.
     discovery. Or, alternatively, place your YAML file in a location other
     than the bundle.
 
-    *   See config/projects/TEMPLATE.yaml for a fully documented example of a
+    *   See [`TEMPLATE.yaml`](config/projects/TEMPLATE.yaml) for a fully documented example of a
         configuration file.
-    *   See config/projects/manifest_noreg_example.yaml for a specific example
+    *   See [`manifest_noreg_example.yaml`](config/projects/manifest_noreg_example.yaml) for a specific example
         using a manifest.
-    *   See config/projects/reg_example.yaml for a specific example using a
+    *   See [`reg_example.yaml`](config/projects/reg_example.yaml) for a specific example using a
         file system crawl.
-
 
 3.  Check the permissions on the bundle directory, iteratively. You need read
     permissions on all the bundle directory folders and files. You need to
@@ -94,7 +104,7 @@ subdirectory.
     identified with your content. You may also have to move a small batch of
     test content to a location that is visible to sul-lyberservices-test.
     Since the thumper drives are not mounted on the test server, you can use
-    the /dor/content mount on test for this purpose.
+    the `/dor/content` mount on test for this purpose.
 
 5.  Make sure you have an APO for your object, and that the
     administrativeMetadata data stream has the `<assemblyWF>` defined in it.
@@ -121,18 +131,22 @@ subdirectory.
     useful if you are staging content and not accessioning immediately (since
     the accessioning process will reconfirm checksums).
 
-    First log into sul-lyberservices-test or prod as needed, and then cd into
-    the pre-assembly directory, e.g.
+    First log into sul-lyberservices-test or -prod as needed, and then cd into
+    the lyberservices-scripts directory, e.g.
 
+```
         ssh lyberadmin@sul-lyberadmin-test.stanford.edu
-        cd pre-assembly/current
+        cd lyberservices-scripts/current
         ROBOT_ENVIRONMENT=test bin/discovery_report YAML_FILE
+```
 
     You will probably want to run this against a specific environment so it
     can connect to DOR and confirm registration on the appropriate server,
     e.g:
 
+```
         ROBOT_ENVIRONMENT=production bin/discovery_report YAML_FILE
+```
 
     You will see a report containing:
     *   the total number of objects discovered
@@ -151,7 +165,7 @@ subdirectory.
         if any expected images/data are missing from the manifest
     *   for SMPL style projects, a listing of the the number of files found in
         the content metadata manifest ... which will let you know if you it
-        has correctly found the object in the smpl_manifest.csv file -- a 0
+        has correctly found the object in the `smpl_manifest.csv` file -- a 0
         would mean none were found or listed, which is a problem
 
 
@@ -161,7 +175,9 @@ subdirectory.
     To send the report to a CSV file for better sorting and viewing in Excel,
     send the output to a file using normal UNIX syntax, e.g.:
 
+```
         ROBOT_ENVIRONMENT=production bin/discovery_report YAML_FILE > /full/path/to/report/filename.csv
+```
 
     When sending output to a CSV, you will not see any terminal output while
     the report is running.
@@ -171,51 +187,54 @@ subdirectory.
     consuming, especially for large number of objects. Some options only work
     for certain styles of projects.
 
-    `confirm_checksums`
-:       for manifest style projects, will compute and confirm checksums
+    `confirm_checksums`:
+        for manifest style projects, will compute and confirm checksums
         against the checksum file if it exists -- useful it you are not
         accessioning immediately
-    `check_sourceids`
-:       for manifest style projects, will confirm source IDs are globally
+    `check_sourceids`:
+        for manifest style projects, will confirm source IDs are globally
         unique in DOR (sources ids area already checked for local uniqueness
         in the manifest)
-    `no_check_reg`
-:       for projects where objects are to be registered, DONT'T check if
+    `no_check_reg`:
+        for projects where objects are to be registered, DONT'T check if
         objects are registered and have APOs (assuming they are supposed to be
         registered already)
-    `show_staged`
-:       will show all files that will be staged (warning: will produce a lot
+    `show_staged`:
+        will show all files that will be staged (warning: will produce a lot
         of output if you have lots of objects with lots of files!)
-    `show_smpl_cm`
-:       will show content metadata that will be generated for each SMPL object
+    `show_smpl_cm`:
+        will show content metadata that will be generated for each SMPL object
         using the supplied manifest (warning: will produce a lot of XML output
         if you have lots of objects with lots of files!)
 
-
     e.g.
 
+```
         ROBOT_ENVIRONMENT=production bin/discovery_report YAML_FILE confirm_checksums check_sourceids > report.csv
+```
 
-7.  To run pre-assembly locally:
+7.  To run  locally:
 
-        # Normal run.  Will restart and crete a new log file, overwriting any existing log file for that project.
-        bin/pre-assemble YAML_FILE
+```
+# Normal run.  Will restart and crete a new log file, overwriting any existing log file for that project.
+bin/pre-assemble YAML_FILE
 
-        # Run in resume mode, which will automatically pick up where left off based on the log file.  Passing the --resume flag overrides the actual value of resume from the YAML config.
-        bin/pre-assemble YAML_FILE --resume
+# Run in resume mode, which will automatically pick up where left off based on the log file.  Passing the --resume flag overrides the actual value of resume from the YAML config.
+bin/pre-assemble YAML_FILE --resume
 
-        # Run in limit mode (default of 200), which will automatically limit the number of items pre-assembled to 200 regardless of what is set in the YAML file.  Useful with resume.
-        bin/pre-assemble YAML_FILE --limit --resume
+# Run in limit mode (default of 200), which will automatically limit the number of items pre-assembled to 200 regardless of what is set in the YAML file.  Useful with resume.
+bin/pre-assemble YAML_FILE --limit --resume
 
-        # Run in limit mode (set to 100), which will automatically limit the number of items pre-assembled regardless of what is set in the YAML file.  Useful with resume.
-        bin/pre-assemble YAML_FILE --limit=100 --resume
+# Run in limit mode (set to 100), which will automatically limit the number of items pre-assembled regardless of what is set in the YAML file.  Useful with resume.
+bin/pre-assemble YAML_FILE --limit=100 --resume
+```
 
-    Again, you can add ROBOT_ENVIRONMENT=XXXX to the beginning of the command
+    Again, you can add `ROBOT_ENVIRONMENT=XXXX` to the beginning of the command
     to run in test, production or other modes as needed.
 
 8.  Running in the production environment:
 
-    *   Navigate to the production box, in the pre-assembly area.
+    *   Navigate to the production box, in the lyberservices-scripts area.
     *   Set the ROBOT_ENVIRONMENT=production.
     *   Run pre-assembly with nohup and in the background (&).
     *   Optionally, include the `--resume` option to override the resume
@@ -226,15 +245,18 @@ subdirectory.
 
 
     See the example below:
-
+```
         ssh lyberadmin@sul-lyberservices-prod.stanford.edu
-        cd /home/lyberadmin/pre-assembly/current
+        cd /home/lyberadmin/lyberservices-scripts/current
         ROBOT_ENVIRONMENT=production nohup bin/pre-assemble YAML_FILE &
+```
 
     If you want to run multiple nohup jobs simultaneously, you can redirect
     screen output to a different log file:
 
+```
         ROBOT_ENVIRONMENT=production nohup bin/pre-assemble YAML_FILE > another_nohup_filename.out 2>&1&
+```
 
     Various ways to monitor progress:
     1.  The workflow grid in Argo, using your project tag to filter.
@@ -253,8 +275,9 @@ subdirectory.
 9.  Running in batch mode, automatically splitting a large run in groups of
     smaller jobs, using limits and resume:
 
-
+```
     bin/batch_run YAML_CONFIG [LIMIT]
+```
 
 This will run pre-assembly multiple times sequentially, using resume and
 limits, allowing the process to end and restart each time. This is useful to
@@ -266,12 +289,13 @@ sending the output to a file.  If no limit is specified, a default of 200 is
 used.
 
     e.g.
-
+```
     nohup ROBOT_ENVIRONMENT=production bin/batch_run /dor/staging/Revs/mail_box4.yaml > /dor/preassembly/revs/mailander_box4_batch.out 2>&1&
     # will run ALL of the incomplete items in that YAML file in the background, but in groups of the default size of 200, sending output for all runs to the mailander_box4_batch.out file
 
     nohup ROBOT_ENVIRONMENT=production bin/batch_run /dor/staging/Revs/mail_box4.yaml 100 > /dor/preassembly/revs/mailander_box4_batch.out 2>&1&
     # will run ALL of the incomplete items in that YAML file in the background, but in groups of 100, sending output for all runs to the mailander_box4_batch.out file
+```
 
 ## Expert Cheatsheet
 
@@ -293,7 +317,7 @@ Here's a quick summary of the basic execution steps:
     % bin/discovery_report $BUNDLEDIR/$YAML
     % bin/pre-assemble $BUNDLEDIR/$YAML
 
-# Legacy Project Notes
+# Notes
 
 The assembly robots will automatically create jp2 derivates from any TIFFs,
 JP2s, or JPEGs. If you are working on a legacy project that has JP2s already
@@ -305,13 +329,6 @@ the TIFF (but with a different extension) they will be kept as is (i.e. they
 will NOT have JP2s re-generated from the source TIFFs). If you do stage the
 JP2 files and they have a different basename than the TIFFs, they WILL be
 re-generated, and you will end up with two copies, in two different resources.
-
-## Deployment
-
-    cap stage deploy  # for lyberservices-test
-    cap prod deploy # for lyberservices-prod
-
-Only the `v3-legacy` branch is deployed.
 
 ## Setting up code for local development
 
@@ -371,15 +388,10 @@ use the commands below.  As noted above, integration tests require VPN.
 Use the ROBOT_ENVIRONMENT=xxxxx in front of commands to run in a specific
 environment.  Current available environments are:
 
-local
-:   your laptop
-development
-:   development servers
-test
-:   test servers
-production
-:   production servers
-
+- local:   your laptop
+- development:   development servers
+- test:   test servers
+- production:   production servers
 
 The server environments define which instance of DOR is connected to, as well
 as the workflow and other services. If you run in the incorrect environment,
@@ -415,22 +427,24 @@ For more info on screen, see http://kb.iu.edu/data/acuy.html
 
 ## Troubleshooting
 
-1.  Seeing an error like this when you try to run pre-assembly or a discovery
-    report?
+### Seeing an error like this when you try to run pre-assembly or a discovery report?
 
-
+```
 Psych::SyntaxError: (<unknown>): mapping values are not allowed in this
 context at line 37 column 14
+```
 
-Its probably because your YAML configuration file is malformed. YAML is very
-picky, particularly in tabs, spacing and other formatting trickeries.  You can
-see if your YAML file loads straight on the console:
+It's probably because your YAML configuration file is malformed. YAML is very
+picky, particularly in tabs, spacing and other formatting trickeries.  You verify
+your YAML file inside `rails console` or `irb`:
 
-bin/console yaml_config='/full/path/to/your/config.yaml' params =
-YAML.load(File.read yaml_config)
+```
+bin/console yaml_config = '/full/path/to/your/config.yaml'
+params = YAML.load(File.read yaml_config)
+```
 
 If you get a hash of values back, it parsed correctly.  If you get the
-Psych::SyntaxError, it did not.  The line number referenced in the error
+`Psych::SyntaxError`, it did not.  The line number referenced in the error
 should help you locate the part of your file that is having issues.  Edit and
 try loading the YAML again on the console to confirm.
 
@@ -477,8 +491,8 @@ try loading the YAML again on the console to confirm.
         files just to be safe.
 
     5.  You had an existing JP2 in the directory that matched a DPG style
-        filename (e.g. if you had existing tiff called xx000yy1111_00_01.tif
-        and a jp2 called xx000yy1111_05_01.jp2), you will not get another jp2
+        filename (e.g. if you had existing tiff called `xx000yy1111_00_01.tif`
+        and a jp2 called `xx000yy1111_05_01.jp2`), you will not get another jp2
         from that tiff even though there would not be a filename clash, under
         the principle that it refers to the same image).
 
@@ -498,13 +512,14 @@ try loading the YAML again on the console to confirm.
 
     It is possible to force add color profiles to a single image or all of the
     images in a given directory:
-
+```
         source_img=Assembly::Image.new('/input/path_to_file.tif') # add to a single image
         source_img.add_exif_profile_description('Adobe RGB 1998')
-
+```
     or
-
+```
         Assembly::Images.batch_add_exif_profile_description('/full_path_to_tifs','Adobe RGB 1998')    # add to multiple images
+```
 
 8.  If you see incorrect content metadata being generated, note that if
     should_register = false, the 'Process : Content Type' tag for each
@@ -524,9 +539,11 @@ it will continue and log the errors. The progress log file you specified in
 your YAML configuration will contain information about which bundles failed.
 You can re-start pre-assembly and ask it to re-try the failed objects and
 continue with any other objects that it hadn't done yet. To do this, use the
---resume flag when you run pre-assembly:
+`--resume` flag when you run pre-assembly:
 
+```
     ROBOT_ENVIRONMENT=production bin/pre-assemble YAML_FILE --resume
+```
 
 ## Post Accessioning Reports
 
