@@ -7,6 +7,8 @@ require 'coveralls'
 SimpleCov.formatter = Coveralls::SimpleCov::Formatter
 SimpleCov.start do
   track_files "bin/**/*"
+  track_files "devel/**/*.rb"
+  add_filter "spec/**/*"
 end
 
 puts "running in #{ENV['ROBOT_ENVIRONMENT']} mode"
