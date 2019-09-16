@@ -806,7 +806,6 @@ describe PreAssembly::DigitalObject do
     end
 
     let(:client) { double }
-    let(:service_url) { 'http://example.edu/dor/services/endpoint' }
 
     context 'when @init_assembly_wf is false' do
       before do
@@ -821,18 +820,19 @@ describe PreAssembly::DigitalObject do
 
     context 'when @init_assembly_wf is true' do
       before do
-        allow(client).to receive_message_chain(:object, :workflow, :create)
+        allow(client).to receive(:create_workflow_by_name)
       end
 
       it 'starts the assembly workflow' do
         expect(@dobj).to receive(:api_client)
+        expect(client).to receive(:create_workflow_by_name).with(@pid, 'assemblyWF')
         @dobj.initialize_assembly_workflow
       end
     end
 
     context 'when the api client raises' do
       before do
-        allow(client).to receive_message_chain(:object, :workflow, :create).and_raise(Exception)
+        allow(client).to receive(:create_workflow_by_name).and_raise(Exception)
       end
 
       it 'raises an exception' do
