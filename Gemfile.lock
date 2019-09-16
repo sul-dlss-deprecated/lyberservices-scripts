@@ -394,8 +394,8 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  actionmailer (> 4.2.10)
-  actionpack (> 4.2.10)
+  actionmailer (~> 5.2)
+  actionpack (~> 5.2)
   assembly-image
   assembly-objectfile (>= 1.7.2)
   assembly-utils
