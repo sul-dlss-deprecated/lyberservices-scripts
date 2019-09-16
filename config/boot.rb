@@ -30,9 +30,3 @@ unless defined?(NO_ENVIRONMENT)
   Dor::Services::Client.configure(url: Dor::Config.dor_services.url,
                                   token: Dor::Config.dor_services.token)
 end
-
-require 'revs-utils'
-
-class RevsUtils
-  extend Revs::Utils
-end

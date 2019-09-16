@@ -69,14 +69,9 @@ module PreAssembly
 
           if should_remediate? # should_remediate? == true
 
-            if updates_allowed?
-                if versioning_required?
-                    update_object_with_versioning
-                    @message='remediated with versioning' if @success
-                else
-                    update_object
-                    @message='remediated directly (versioning not required)' if @success
-                end
+            if openable?
+              update_object_with_versioning
+              @message='remediated with versioning' if @success
             else
               @success=false
               @message='currently in accessioning, cannot remediate'
@@ -105,16 +100,13 @@ module PreAssembly
       def update_object_with_versioning
         open_version
         update_object if @success # only continue the process if everything is still good
-        close_version if @success # only continue the process if everything is still good
+        close_version if @success # this will save the object too
       end
 
       def update_object
         begin
           @success=remediate_logic # this method must be defined for your specific remediation passed in
-          if @success
-            @fobj.save
-            @fobj.publish_metadata unless versioning_required?
-          end
+          # note: the object is now saved when the version is closed
         rescue Exception => e
           @success=false
           @message="Updating object failed: #{e.message}"
@@ -123,22 +115,20 @@ module PreAssembly
 
      def open_version
        begin # try and open the version
-         @fobj.open_new_version(:assume_accessioned=>true) unless @fobj.new_version_open?
-         @fobj.versionMetadata.update_current_version({:description => "auto remediation #{@description}",:significance => :admin})
+         Dor::Services::Client.object(@fobj.id).version.open(
+           significance: 'admin',
+           description: "pre-assembly remediation #{@description}"
+         )
          @success=true
        rescue Exception => e
-         if e.message.downcase.include?('already opened')
-           @success=true # an already opened version is fine, just proceed as normal
-         else
-           @success=false
-           @message="Opening object failed: #{e.message}"
-         end
+         @success=false
+         @message="Opening object failed: #{e.message}"
        end
      end
 
      def close_version
        begin # try and close the version
-         @fobj.close_version(:description => "auto remediation #{@description}", :significance => :admin) if @fobj.new_version_open?
+         Dor::Services::Client.object(@fobj.id).version.close
          @success=true
        rescue Exception => e
          @success=false
@@ -159,33 +149,9 @@ module PreAssembly
       `BUNDLE_GEMFILE=~/assembly/current/Gemfile ROBOT_ENVIRONMENT=#{ENV['ROBOT_ENVIRONMENT']} bundle exec ~/assembly/current/bin/run_robot dor:assemblyWF:#{name} -e #{ENV['ROBOT_ENVIRONMENT']} -d #{@pid}`
      end
 
-     def updates_allowed?
-       @updates_allowed ||= Dor::Config.remediation.check_for_in_accessioning ? !in_accessioning? && is_ingested? : true
+     def openable?
+       Dor::Services::Client.object(@fobj.id).version.openable?
      end
-
-     def versioning_required?
-       @versioning_required ||= (Dor::Config.remediation.check_for_versioning_required) ? !((!is_ingested? && ingest_hold?) || (!is_ingested? && !is_submitted?)) : false # object can be updated directly, no versioning needed
-     end
-
-    # Check if the object is full accessioned and ingested, either we have an accessioned lifecycle
-    def is_ingested?
-      Dor::Config.workflow.client.get_lifecycle(REPO, @pid, 'accessioned') ? true : false
-    end
-
-    def in_accessioning?
-      Dor::Config.workflow.client.get_active_lifecycle(REPO, @pid, 'submitted') ? true : false
-    end
-
-    # Check if the object is on ingest hold
-    def ingest_hold?
-      # accession2WF is temporary, and anything set to "waiting" in that workflow is really treated like a "hold" condition
-      Dor::Config.workflow.client.get_workflow_status(REPO, @pid, 'accessionWF','sdr-ingest-transfer') == 'hold' || (Dor::Config.workflow.client.get_workflow_status(REPO, @pid, 'accession2WF','sdr-ingest-transfer') == 'waiting' && Dor::Config.workflow.client.get_workflow_status(REPO, @pid, 'accessionWF','sdr-ingest-transfer').nil?)
-    end
-
-    # Check if the object is submitted
-    def is_submitted?
-      Dor::Config.workflow.client.get_lifecycle(REPO, @pid, 'submitted').nil?
-    end
 
     end
 
