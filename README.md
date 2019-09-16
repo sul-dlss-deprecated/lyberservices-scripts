@@ -850,8 +850,6 @@ $ ROBOT_ENVIRONMENT=test bin/console
 completed_druids=Assembly::Utils.get_druids_from_log('/dor/preassembly/sohp_accession_log.yaml',true)
 failed_druids=Assembly::Utils.get_druids_from_log('/dor/preassembly/sohp_accession_log.yaml',false)
 
-# e.g. get workflow status of failed druids:
-Assembly::Utils.workflow_status(:druids=>failed_druids,:workflows=>[:assembly,:accession],:filename=>'output.csv')
 ```
 
 If you want to find druids by source_id, use the utility method
@@ -864,96 +862,6 @@ e.g.
 
     source_ids=%w{foo:123 bar:456}
     druids=Assembly::Utils.get_druids_by_sourceid(source_ids)
-    Assembly::Utils.workflow_status(:druids=>druids,:workflows=>[:assembly,:accession],:filename=>'output.csv')
-
-### Workflow Status Report
-
-If you want to check on the status of objects in DOR without using Argo, you
-can do this using the following method. You can specify assembly and/or
-accession workflows (as symbols), and also a filename if you want the report
-written to disk in CSV format.
-
-```
-$ ROBOT_ENVIRONMENT=test bin/console
-
-druids=%w{druid:aa111aa1111 druid:bb222bb2222}
-Assembly::Utils.workflow_status(:druids=>druids,:workflows=>[:assembly,:accession])  # add :filename=>'output.csv' to get a CSV report
-```
-
-### Updating Datastreams
-
-Once you have content accessioned, you might need to batch update datastreams
-(for example, to globally fix a typo). You can do this by providing an array
-of druids, the name of a datastream and some new content:
-
-    druids=%w{druid:aa111aa1111 druid:bb222bb2222}
-    new_content='<xml><more nodes>this should be the whole datastream</more nodes></xml>'
-    datastream='rightsMetadata'
-    Assembly::Utils.replace_datastreams(druids,datastream,new_content)
-
-You can also just replace a part of a datastream instead of the whole thing.
-Be careful, this just runs a .gsub on the entire datastream, so it can do
-damage if you aren't careful.
-
-    druids=%w{druid:aa111aa1111 druid:bb222bb2222}
-    find_content='FooBarBaz'
-    replace_content='Stanford Rules'
-    datastream='rightsMetadata'
-    Assembly::Utils.update_datastreams(druids,datastream,find_content,replace_content)
-
-A helper method is provided to update rightsMetadata using the default rights
-contained in an APO. To do this, supply a list of druids to update and the
-druid of the APO to get default rights from:
-
-    druids=%w{druid:aa111aa1111 druid:bb222bb2222}
-    apo_druid='druid:cc222cc2222'
-    Assembly::Utils.update_rights_metadata(druids,apo_druid)
-
-### Finding Errored Out Objects
-
-You can get a hash containing objects that have errored out in a specific
-workflow and step, including the error message. Note that if you don't supply
-a tag, both of the following commands work for **ALL** objects in DOR, they
-are not specific to your project. If you do supply a tag, it should be exact
-(e.g. 'Project : Revs'), and if you have a lot of objects in DOR in a specific
-error state, the call may take a long time, since it will need to look up each
-object in DOR.
-
-    $ ROBOT_ENVIRONMENT=test bin/console
-
-    result=Assembly::Utils.get_errored_objects_for_workstep('accessionWF','content-metadata')
-
-To filter to a specific project, supply a tag:
-
-    result=Assembly::Utils.get_errored_objects_for_workstep('accessionWF','content-metadata','Project : Revs')
-
-You can also automatically reset all of those objects to waiting:
-
-    result=Assembly::Utils.reset_errored_objects_for_workstep('accessionWF','content-metadata')
-
-You can also supply a tag here:
-
-    result=Assembly::Utils.reset_errored_objects_for_workstep('accessionWF','content-metadata','Project : Revs')
-
-### Reset Workflow States
-
-If an object fails for some reason and you manually remediate something, you
-may need to reset the workflow state for certain steps to try again. You can
-reset any workflow steps back to "waiting" for any list of druids you specify
-and any workflow states. To do this use the
-Assembly::Utils.reset_workflow_states method. Provide a list of druids in an
-array, and a hash containing workflow names (e.g. 'assemblyWF' or
-'accessionWF') as the keys, and arrays of steps as the corresponding values
-(e.g. ['checksum-compute','jp2-create']) and they will all be reset to
-"waiting".
-
-e.g.
-
-    $ ROBOT_ENVIRONMENT=test bin/console
-
-    druids=%w{druid:aa111aa1111 druid:bb222bb2222}
-    steps={'assemblyWF'  => ['checksum-compute'],'accessionWF' => ['content-metadata','descriptive-metadata']}
-    Assembly::Utils.reset_workflow_states(:druids=>druids,:steps=>steps)
 
 ## Remediation
 
@@ -1026,14 +934,8 @@ indicating if remediation succeeded and a message. You can re-run the
 remediation with the same CSV file and it will automatically skip already
 completed objects - SO KEEP THE CSV FILE.
 
-You can also add optional parameters to override defaults for checking if
-items are in accessioning or if they require versioning and set to false. Only
-do this if you are sure you know what you are doing for scripts that for some
-reason will not work with versioning!
-
 ROBOT_ENVIRONMENT=production bin/remediate INPUT_FILE.csv
-REMEDIATE_LOGIC_FILENAME.rb [PAUSE_TIME_IN_SECONDS] ignore_versioning
-ignore_accessioning
+REMEDIATE_LOGIC_FILENAME.rb [PAUSE_TIME_IN_SECONDS]
 
 Finally, you can specify a pause time in seconds per object. This can be
 useful for large remediation jobs that are a low priority, which allows them
