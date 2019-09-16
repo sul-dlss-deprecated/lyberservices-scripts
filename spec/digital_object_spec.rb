@@ -805,7 +805,7 @@ describe PreAssembly::DigitalObject do
       @dobj.druid = @druid
     end
 
-    let(:client) { double }
+    let(:client) { instance_double(Dor::Workflow::Client) }
 
     context 'when @init_assembly_wf is false' do
       before do
