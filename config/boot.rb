@@ -8,15 +8,7 @@ CERT_DIR = File.join(File.dirname(__FILE__), ".", "certs")
 
 # General DLSS infrastructure.
 require 'dor-services'
-require 'dor-workflow-service'
-
-# Environment.
-unless defined?(NO_ENVIRONMENT)
-  ENV_FILE = PRE_ASSEMBLY_ROOT + "/config/environments/#{environment}.rb"
-  require ENV_FILE
-  Dor::Config.dor_services.url ||= Dor::Config.dor.service_root
-  Dor::Config.workflow.client.configure(Dor::Config.workflow.url,:dor_services_url => Dor::Config.dor_services.url.gsub('/v1',''))
-end
+require 'dor/workflow/client'
 
 # Project dir in load path.
 $LOAD_PATH.unshift(PRE_ASSEMBLY_ROOT + '/lib')
@@ -30,6 +22,14 @@ require 'awesome_print' if ['local', 'development'].include? environment
 
 # Load the project and its dependencies.
 require 'pre_assembly'
+
+# Environment.
+unless defined?(NO_ENVIRONMENT)
+  ENV_FILE = PRE_ASSEMBLY_ROOT + "/config/environments/#{environment}.rb"
+  require ENV_FILE
+  Dor::Services::Client.configure(url: Dor::Config.dor_services.url,
+                                  token: Dor::Config.dor_services.token)
+end
 
 require 'revs-utils'
 

@@ -497,16 +497,14 @@ module PreAssembly
       log "    - initialize_assembly_workflow()"
 
        with_retries(max_tries: Dor::Config.dor.num_attempts, rescue: Exception, handler: PreAssembly.retry_handler('INITIALIZE_ASSEMBLY_WORKFLOW', method(:log))) do
-          api_client.object(@druid.druid).workflow.create(wf_name: workflow_name)
+          api_client.create_workflow_by_name(@druid.druid, workflow_name)
        end
     end
 
     private
 
     def api_client
-      @api_client ||= Dor::Services::Client.configure(url: Dor::Config.dor_services.url,
-                                                      username: Dor::Config.dor_services.user,
-                                                      password: Dor::Config.dor_services.pass)
+      @api_client ||= Dor::Workflow::Client.new(url: Dor::Config.workflow.url)
     end
 
     def workflow_name
