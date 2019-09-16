@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 
-gem 'actionmailer', '~> 4.2.10'
-gem 'actionpack', '~> 4.2.10'
+gem 'actionmailer', '~> 5.2'
+gem 'actionpack', '~> 5.2'
 gem 'csv-mapper'
 gem 'equivalent-xml'
 gem 'nokogiri'
@@ -25,7 +25,6 @@ gem 'dor-workflow-client'
 gem 'druid-tools'
 gem 'harvestdor'
 gem 'modsulator'
-gem 'revs-utils', '~> 2.1.24'
 gem 'stanford-mods'
 
 group :test do

@@ -58,7 +58,6 @@ else
 end
 
 ignore_accessioning = true if ARGV.include? 'ignore_accessioning' # override config file if supplied
-ignore_versioning = true if ARGV.include? 'ignore_versioning'  # override config file if supplied
 
 help "Input file not found." unless File.file?(input_file)
 help "REMEDIATE_LOGIC_FILE file not found." unless File.file?(remediate_logic_file)
@@ -68,10 +67,6 @@ require remediate_logic_file
 if ignore_accessioning
   puts "*** OVERRIDING CONFIG: Ignoring accessioning check"
   Dor::Config.remediation.check_for_in_accessioning = false
-end
-if ignore_versioning
-  puts "*** OVERRIDING CONFIG: Ignoring versioning check"
-  Dor::Config.remediation.check_for_versioning_required = false
 end
 
 source_path=File.dirname(input_file)
