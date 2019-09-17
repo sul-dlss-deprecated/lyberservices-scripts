@@ -12,11 +12,8 @@
 # You can specify an optional number of seconds to pause between each object (in seconds) after the remediation logic filename.  If left off, no
 # pause between objects will occur. This can be useful for large remediation jobs that are a low priority, which allows them to run at a slower pace
 # and thus generating less concurrent load on the system while other higher priority jobs are running concurrently.
-# You can also add in optional parameters to override defaults for checking if items are in accessioning or if they require versioning and set to false.
-# Only do this if you are sure you know what you are doing for scripts that for some reason will not work with versioning!  If you want to add these
-# parameters, you must also specify the pause time (which could be 0).
 
-# ROBOT_ENVIRONMENT=production bin/remediate INPUT_FILE.csv REMEDIATE_LOGIC_FILENAME.rb [PAUSE_TIME_IN_SECONDS] ignore_versioning ignore_accessioning
+# ROBOT_ENVIRONMENT=production bin/remediate INPUT_FILE.csv REMEDIATE_LOGIC_FILENAME.rb [PAUSE_TIME_IN_SECONDS]
 
 # INPUT_FILE can be either a pre-assembly generated YAML log file or a CSV file with one column containing at least a list of druids
 # If a pre-assembly YAML log file is passed in, the successfully accessioned druids will be used.
@@ -57,17 +54,10 @@ else
   pause_time = 0
 end
 
-ignore_accessioning = true if ARGV.include? 'ignore_accessioning' # override config file if supplied
-
 help "Input file not found." unless File.file?(input_file)
 help "REMEDIATE_LOGIC_FILE file not found." unless File.file?(remediate_logic_file)
 
 require remediate_logic_file
-
-if ignore_accessioning
-  puts "*** OVERRIDING CONFIG: Ignoring accessioning check"
-  Dor::Config.remediation.check_for_in_accessioning = false
-end
 
 source_path=File.dirname(input_file)
 source_ext=File.extname(input_file)
