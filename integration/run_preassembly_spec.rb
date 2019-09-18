@@ -22,7 +22,7 @@ describe "Pre-assembly integration" do
   ]
 
   PROJECTS.each do |p|
-     # The Revs Project tests try to register objects during integration tests, 
+     # The Revs Project tests try to register objects during integration tests,
      # and the SURI service tries to make a Fedora connection, breaking the tests.
      # Disable them for now so at least the other integration tests can run -- July 17, 2017 Peter Mangiafico
     if p.match(/(revs)/)
@@ -125,7 +125,7 @@ describe "Pre-assembly integration" do
     # Setup the bundle for a project and run pre-assembly.
     setup_bundle proj
     @pids = @b.run_pre_assembly
-    determine_staged_druid_trees(@b.new_druid_tree_format)
+    determine_staged_druid_trees
 
     # Run checks.
     check_n_of_objects
@@ -145,7 +145,7 @@ describe "Pre-assembly integration" do
     # Load the project's YAML config file.
     yaml_file = "#{PRE_ASSEMBLY_ROOT}/spec/test_data/project_config_files/local_dev_#{proj}.yaml"
     yaml      = YAML.load_file yaml_file
-    @params   = Assembly::Utils.symbolize_keys yaml
+    @params = yaml.deep_symbolize_keys
     # Create a temp dir to serve as the staging area.
     @temp_dir = Dir.mktmpdir "#{proj}_integ_test_", 'tmp'
 
@@ -164,13 +164,9 @@ describe "Pre-assembly integration" do
     @exp_files = exp[:exp_files]
   end
 
-  def determine_staged_druid_trees(new_druid_tree_format)
+  def determine_staged_druid_trees
     # Determine the druid tree paths in the staging directory.
-    if new_druid_tree_format
-      @druid_trees = @pids.map { |pid| DruidTools::Druid.new(pid,@temp_dir).path() }
-    else
-      @druid_trees = @pids.map { |pid| Assembly::Utils.get_staging_path(pid,@temp_dir) }
-    end
+    @druid_trees = @pids.map { |pid| DruidTools::Druid.new(pid,@temp_dir).path() }
   end
 
 

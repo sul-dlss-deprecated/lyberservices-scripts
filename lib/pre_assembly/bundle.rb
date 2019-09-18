@@ -3,7 +3,6 @@
 require 'csv'
 require 'ostruct'
 require 'pathname'
-# require 'ruby-prof' # necessary to get ruby profiling working, but causes issues/errors with rest-client if required
 
 module PreAssembly
 
@@ -47,7 +46,6 @@ module PreAssembly
       :resume,
       :config_filename,
       :validate_files,
-      :new_druid_tree_format,
       :validate_bundle_dir,
       :throttle_time,
       :staging_style,
@@ -80,8 +78,8 @@ module PreAssembly
     def initialize(params = {})
       # Unpack the user-supplied parameters, after converting
       # all hash keys and some hash values to symbols.
-      params = Assembly::Utils.symbolize_keys params
-      Assembly::Utils.values_to_symbols! params[:project_style]
+      params.deep_symbolize_keys!
+      params[:project_style].each { |k, v| params[:project_style][k] = v.to_sym if v.class == String }
       cmc          = params[:content_md_creation]
       cmc[:style]  = cmc[:style].to_sym
       params[:file_attr] ||= params[:publish_attr]
@@ -125,7 +123,6 @@ module PreAssembly
       @garbage_collect_each_n = 50 if @garbage_collect_each_n.nil? # when to run garbage collection manually
       @profile = false if @profile.nil? # default to no profiling
       @validate_files = true if @validate_files.nil? # default to validating files if not provided
-      @new_druid_tree_format = true if @new_druid_tree_format.nil? # default to new style druid tree format
       @throttle_time = 0 if @throttle_time.nil? # no throttle time if not supplied
       @staging_style = 'copy' if @staging_style.nil? # staging style defaults to copy
       @project_style[:content_tag_override] = false if @project_style[:content_tag_override].nil? # default to false
@@ -185,7 +182,6 @@ module PreAssembly
       [
         :config_filename,
         :validate_files,
-        :new_druid_tree_format,
         :staging_style,
         :validate_bundle_dir,
         :throttle_time,
@@ -368,7 +364,7 @@ module PreAssembly
     def cleanup(steps=[],dry_run=false)
       log "cleanup()"
       if File.exists?(@progress_log_file)
-        druids=Assembly::Utils.get_druids_from_log(@progress_log_file)
+        druids=PreAssembly::Utils.get_druids_from_log(@progress_log_file)
       else
         puts "#{@progress_log_file} not found!  Cannot proceed"
         return
@@ -436,7 +432,6 @@ module PreAssembly
           :unadjusted_container => c,
           :stageable_items      => stageables,
           :object_files         => object_files,
-          :new_druid_tree_format => @new_druid_tree_format,
           :staging_style        => @staging_style,
           :smpl_manifest        => @smpl_manifest
         }

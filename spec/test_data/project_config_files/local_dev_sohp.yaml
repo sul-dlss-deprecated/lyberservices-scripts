@@ -49,7 +49,6 @@ manifest_cols:
 
 content_exclusion:    ~
 
-new_druid_tree_format: true
 validate_usage:       false
 show_progress:        true
 limit_n:              10

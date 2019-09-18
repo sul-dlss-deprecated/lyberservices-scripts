@@ -13,7 +13,6 @@ describe PreAssembly::DigitalObject do
       :project_style => {:should_register=>true},
       :content_md_creation => {},
       :bundle_dir    => 'spec/test_data/bundle_input_g',
-      :new_druid_tree_format => true,
       :staging_style=>'copy'
     }
     @dobj         = PreAssembly::DigitalObject.new @ps
@@ -398,22 +397,13 @@ describe PreAssembly::DigitalObject do
   end
 
   #########
-  describe "check the druid tree directories and content and metadata locations using both the new style and the old style" do
+  describe "check the druid tree directories and content and metadata locations " do
 
     it "should have the correct druid tree folders using the new style" do
       @dobj.druid = @druid
-      @dobj.new_druid_tree_format = true
       expect(@dobj.druid_tree_dir).to eq('gn/330/dv/6119/gn330dv6119')
       expect(@dobj.metadata_dir).to eq('gn/330/dv/6119/gn330dv6119/metadata')
       expect(@dobj.content_dir).to eq('gn/330/dv/6119/gn330dv6119/content')
-    end
-
-    it "should have the correct druid tree folders using the old style" do
-      @dobj.druid = @druid
-      @dobj.new_druid_tree_format = false
-      expect(@dobj.druid_tree_dir).to eq('gn/330/dv/6119')
-      expect(@dobj.metadata_dir).to eq('gn/330/dv/6119')
-      expect(@dobj.content_dir).to eq('gn/330/dv/6119')
     end
 
   end

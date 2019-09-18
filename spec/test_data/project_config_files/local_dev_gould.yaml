@@ -40,7 +40,7 @@ stageable_discovery:
   use_container:      false
   glob:               '00'
   regex:              ~
-      
+
 manifest_cols:
   object_container:   ~
   source_id:          ~
@@ -48,7 +48,6 @@ manifest_cols:
 
 content_exclusion:    ~
 
-new_druid_tree_format: true
 validate_usage:       true
 show_progress:        true
 limit_n:              10

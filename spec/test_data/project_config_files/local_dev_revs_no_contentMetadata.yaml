@@ -55,4 +55,3 @@ limit_n:              10
 uniqify_source_ids:   true
 cleanup:              true
 resume:               false
-new_druid_tree_format: false

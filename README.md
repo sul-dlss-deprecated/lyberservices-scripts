@@ -583,22 +583,6 @@ has spaces in it, be sure to use quotes, like this:
 ROBOT_ENVIRONMENT=production bin/generate_collection_report "Stanford Oral History Project"
 ```
 
-### completion report
-
-The second report is called a `"completion_report"` and uses the pre-assemble
-YAML configuration file to determine the successfully accessioned objects.
-Only those objects are included in the report. The report is run with:
-
-```
-ROBOT_ENVIRONMENT=production bin/completion_report YAML_FILE
-```
-
-e.g.:
-
-```
-ROBOT_ENVIRONMENT=production bin/completion_report /thumpers/dpgthumper2-smpl/SC1017_SOHP/sohp_prod_accession.yaml
-```
-
 ## Manifests
 
 Manifests are a way of indicating which objects you will be accessioning. A
@@ -847,8 +831,8 @@ e.g.
 ```
 $ ROBOT_ENVIRONMENT=test bin/console
 
-completed_druids=Assembly::Utils.get_druids_from_log('/dor/preassembly/sohp_accession_log.yaml',true)
-failed_druids=Assembly::Utils.get_druids_from_log('/dor/preassembly/sohp_accession_log.yaml',false)
+completed_druids=PreAssembly::Utils.get_druids_from_log('/dor/preassembly/sohp_accession_log.yaml',true)
+failed_druids=PreAssembly::Utils.get_druids_from_log('/dor/preassembly/sohp_accession_log.yaml',false)
 
 ```
 

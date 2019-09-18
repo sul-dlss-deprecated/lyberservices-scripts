@@ -27,7 +27,6 @@ module PreAssembly
       :desc_md_template_xml,
       :init_assembly_wf,
       :content_md_creation,
-      :new_druid_tree_format,
       :staging_style,
       :smpl_manifest
     ]
@@ -108,7 +107,7 @@ module PreAssembly
 
     # compute the base druid tree folder for this object
     def druid_tree_dir
-      @druid_tree_dir ||=  (@new_druid_tree_format ? DruidTools::Druid.new(@druid.id,@staging_dir).path() : Assembly::Utils.get_staging_path(@druid.id,@staging_dir))
+      @druid_tree_dir ||=  DruidTools::Druid.new(@druid.id,@staging_dir).path()
     end
 
     def druid_tree_dir=(value)
@@ -117,12 +116,12 @@ module PreAssembly
 
     # the content subfolder
     def content_dir
-      @content_dir ||= (@new_druid_tree_format ? File.join(druid_tree_dir,'content') : druid_tree_dir)
+      @content_dir ||= File.join(druid_tree_dir,'content')
     end
 
     # the metadata subfolder
     def metadata_dir
-      @metadata_dir ||=  (@new_druid_tree_format ? File.join(druid_tree_dir,'metadata') : druid_tree_dir)
+      @metadata_dir ||=  File.join(druid_tree_dir,'metadata')
     end
 
     ####

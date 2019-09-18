@@ -14,7 +14,7 @@ describe PreAssembly::Bundle do
       :proj_sohp_files_only   => 'spec/test_data/project_config_files/local_dev_sohp_files_only.yaml',
       :proj_sohp_files_and_folders   => 'spec/test_data/project_config_files/local_dev_sohp_files_and_folders.yaml',
       :proj_folder_manifest   => 'spec/test_data/project_config_files/local_dev_folder_manifest.yaml',
-      :proj_with_tag          => 'spec/test_data/project_config_files/local_dev_revs_old_druid_style.yaml'
+      :proj_with_tag          => 'spec/test_data/project_config_files/local_dev_revs_with_tag.yaml'
     }
     @yaml={}
     @yaml_filenames.each {|key,value| @yaml[key]=File.read(value) }
@@ -25,7 +25,7 @@ describe PreAssembly::Bundle do
     @ps = YAML.load @yaml[proj]
     @ps['config_filename']=@yaml_filenames[proj]
     @ps['show_progress']=false
-    @b  = PreAssembly::Bundle.new @ps
+    @b  = PreAssembly::Bundle.new @ps.deep_dup
   end
 
   ####################
@@ -935,40 +935,6 @@ describe PreAssembly::Bundle do
     it "source_id_suffix() should look like an integer if making unique source IDs" do
       @b.uniqify_source_ids = true
       expect(@b.source_id_suffix).to match(/^_\d+$/)
-    end
-
-    it "symbolize_keys() should handle various data structures correctly" do
-      tests = [
-        [ {}, {} ],
-        [ [], [] ],
-        [ [1,2], [1,2] ],
-        [ 123, 123 ],
-        [
-          { :foo => 123, 'bar' => 456 },
-          { :foo => 123, :bar  => 456 }
-        ],
-        [
-          { :foo => [1,2,3], 'bar' => { 'x' => 99, 'y' => { 'AA' => 22, 'BB' => 33 } } },
-          { :foo => [1,2,3], :bar  => { :x  => 99, :y  => { :AA  => 22, :BB  => 33 } } },
-        ],
-
-      ]
-      tests.each do |input, exp|
-        expect(Assembly::Utils.symbolize_keys(input)).to eq(exp)
-      end
-    end
-
-    it "values_to_symbols!() should convert string values to symbols" do
-      tests = [
-        [ {}, {} ],
-        [
-          { :a => 123, :b => 'b', :c => 'ccc' },
-          { :a => 123, :b => :b , :c => :ccc  },
-        ],
-      ]
-      tests.each do |input, exp|
-        expect(Assembly::Utils.values_to_symbols!(input)).to eq(exp)
-      end
     end
 
   end
