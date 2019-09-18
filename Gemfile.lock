@@ -334,7 +334,6 @@ GEM
     rspec-support (3.8.2)
     ruby-cache (0.3.0)
     ruby-graphviz (1.2.4)
-    ruby-prof (1.0.0)
     ruby-progressbar (1.10.1)
     rubydora (2.1.0)
       activemodel (>= 4.2.10)
@@ -423,7 +422,6 @@ DEPENDENCIES
   retries
   roo
   rspec (~> 3.0)
-  ruby-prof
   solr_wrapper
   stanford-mods
 

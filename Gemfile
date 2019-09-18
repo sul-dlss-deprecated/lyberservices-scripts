@@ -10,7 +10,6 @@ gem 'rdf'
 gem 'rest-client'
 gem 'retries'
 gem 'roo'
-gem 'ruby-prof'
 gem 'honeybadger', '~> 3.1'
 
 # Stanford gems

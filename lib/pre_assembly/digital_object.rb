@@ -38,7 +38,6 @@ module PreAssembly
       :reg_by_pre_assembly,
       :label,
       :manifest_row,
-      :reaccession,
       :source_id,
       :content_md_file,
       :technical_md_file,
@@ -135,7 +134,6 @@ module PreAssembly
       log "  - pre_assemble(#{@source_id}) started"
       determine_druid
 
-      prepare_for_reaccession if @reaccession
       register
       add_dor_object_to_set
       stage_files
@@ -296,28 +294,6 @@ module PreAssembly
 
     def add_collection_relationship_params(druid)
       [:is_member_of_collection, "info:fedora/#{druid}"]
-    end
-
-    def prepare_for_reaccession
-      # Used during a re-accession, will remove symlinks in /dor/workspace, files from the stacks and content in /dor/assembly, workflows
-      # but will not unregister the object
-      log "  - prepare_for_reaccession(#{@druid})"
-
-      Assembly::Utils.cleanup_object(@druid.druid,[:stacks,:stage,:symlinks])
-
-    end
-
-    def unregister
-      # Used during testing and development work to unregister objects created in -dev.
-      # Do not run unless the object was registered by pre-assembly.
-      return unless @reg_by_pre_assembly
-
-      log "  - unregister(#{@pid})"
-
-      Assembly::Utils.unregister(@pid)
-
-      @dor_object          = nil
-      @reg_by_pre_assembly = false
     end
 
     ####

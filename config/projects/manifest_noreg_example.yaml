@@ -14,7 +14,7 @@ manifest:             'manifest_craig.csv'
 checksums_file:       'output.md5'
 desc_md_template:     '../../mods_template.xml'
 
-progress_log_file:    '/dor/preassembly/revs_craig_log.yaml'  
+progress_log_file:    '/dor/preassembly/revs_craig_log.yaml'
 project_name:         'Revs'
 apo_druid_id:         'druid:qv648vd4392'
 set_druid_id:         'druid:yt502zj0924' # craig set
@@ -51,5 +51,4 @@ validate_usage:       true
 show_progress:        true
 limit_n:              ~
 uniqify_source_ids:   false
-cleanup:              false
 resume:               false

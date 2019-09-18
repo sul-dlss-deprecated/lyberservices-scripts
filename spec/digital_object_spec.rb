@@ -235,32 +235,6 @@ describe PreAssembly::DigitalObject do
 
   ####################
 
-  describe "unregister()" do
-
-    before(:each) do
-      @dobj.dor_object = 1234
-      allow(Assembly::Utils).to receive :delete_from_dor
-      allow(Assembly::Utils).to receive :set_workflow_step_to_error
-    end
-
-    it "should do nothing unless the digitial object was registered by pre-assembly" do
-      expect(@dobj).not_to receive :delete_from_dor
-      @dobj.reg_by_pre_assembly = false
-      @dobj.unregister
-    end
-
-    it "can exercise unregister(), with external calls stubbed" do
-      @dobj.reg_by_pre_assembly = true
-      @dobj.unregister
-      expect(@dobj.dor_object).to eq(nil)
-      expect(@dobj.reg_by_pre_assembly).to eq(false)
-    end
-
-  end
-
-
-  ####################
-
   describe "file staging" do
 
     it "should be able to copy stageable items successfully" do

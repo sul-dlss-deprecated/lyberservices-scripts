@@ -152,7 +152,6 @@ describe "Pre-assembly integration" do
     # Override some params.
     @params[:staging_dir]   = @temp_dir
     @params[:show_progress] = false
-    @params[:cleanup] = false
     @params[:bundle_dir] = File.join(PRE_ASSEMBLY_ROOT,@params[:bundle_dir])
     @params[:validate_bundle_dir][:code] = File.join(PRE_ASSEMBLY_ROOT, @params[:validate_bundle_dir][:code]) if @params[:validate_bundle_dir]
     # Create the bundle.
@@ -198,7 +197,10 @@ describe "Pre-assembly integration" do
   def cleanup_dor_objects
     return unless @b.project_style[:should_register]
     @pids.each do |pid|
-      Assembly::Utils.unregister(pid)
+      Dor::Config.fedora.client["objects/#{pid}"].delete
+      Dor::SearchService.solr.delete_by_id(pid)
+      Dor::SearchService.solr.commit
+      Dor::Workflow::Client.new(url: Dor::Config.workflow.url).delete_all_workflows(pid)
     end
   end
 

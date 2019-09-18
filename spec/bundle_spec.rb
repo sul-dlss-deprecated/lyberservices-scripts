@@ -274,7 +274,6 @@ describe PreAssembly::Bundle do
         :load_provider_checksums,
         :process_manifest,
         :process_digital_objects,
-        :delete_digital_objects,
       ]
       methods.each { |m| expect(@b).not_to receive(m) }
       @b.run_pre_assembly()
@@ -730,14 +729,6 @@ describe PreAssembly::Bundle do
 
   describe "objects_to_process()" do
 
-    it "should have the correct list of objects to re-accession if specified with only option" do
-      bundle_setup :proj_sohp3
-      @b.discover_objects
-      expect(@b.digital_objects.size).to eq(2)
-      o2p = @b.objects_to_process
-      expect(o2p.size).to eq(1)
-    end
-
     it "should have the correct list of objects to accession if specified with except option" do
       bundle_setup :proj_sohp4
       @b.discover_objects
@@ -745,7 +736,6 @@ describe PreAssembly::Bundle do
       o2p = @b.objects_to_process
       expect(o2p.size).to eq(0)
     end
-
 
     it "should return all objects if there are no skippables" do
       bundle_setup :proj_revs
@@ -816,29 +806,6 @@ describe PreAssembly::Bundle do
         :timestamp            => Time.now.strftime('%Y-%m-%d %H:%I:%S')
       }
       expect(@b.log_progress_info(dobj)).to eq(exp)
-    end
-
-  end
-
-  ####################
-
-  describe "delete_digital_objects()" do
-
-    before(:each) do
-      bundle_setup :proj_revs
-      @b.digital_objects = []
-    end
-
-    it "should do nothing if @cleanup == false" do
-      @b.cleanup = false
-      expect(@b.digital_objects).not_to receive :each
-      @b.delete_digital_objects
-    end
-
-    it "should do something if @cleanup == true" do
-      @b.cleanup = true
-      expect(@b.digital_objects).to receive :each
-      @b.delete_digital_objects
     end
 
   end

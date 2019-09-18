@@ -708,99 +708,12 @@ registered (e.g. like Rumsey):
 
 'except' parameter as needed. You can include only specific objects (useful
 when you only want to run a few objects) or you can exclude specific objects
-(useful when you want to run most). Set the 'reaccession' parameter to false
-or nil. Also set a different progress log file so you can store the results of
-your second run separately. See the TEMPLATE.yaml for some examples.
+(useful when you want to run most). Also set a different progress log file so
+you can store the results of your second run separately. See the TEMPLATE.yaml for some examples.
 
 1.  Run pre-assemble.
 
 
-## Re-Accession of Specific Objects
-
-Very similar to above, if you need to re-accession a batch of material (for
-example, after remediating some files in your bundle), you can do this in two
-ways, depending on your project setup.
-
-For projects with a manifest (e.g. like Revs):
-
-1.  Create a new manifest with only the objects you need re-accessioned.
-2.  Create a new project config YAML file referencing the new manifest and
-    write to a new progress log file.
-3.  "Cleanup" your existing objects that you will be re-accessioning using the
-    "Assembly::Utils.cleanup" method on a Ruby console as described below.
-    Since you will be re-registering objects, you will get new DRUIDs, and you
-    should therefore be sure to completely delete your old objects.
-4.  Re-run pre-assemble.
-
-
-For projects that do not use a manifest and which have their objects already
-registered (e.g. like Rumsey):
-
-1.  Create a new project config YAML file and set the parameter
-    'accession_items' and the 'only' parameter to an array of bundle names
-    (e.g. druid folder names) that you want to re-accession.  Set the
-    'reaccession' parameter to true.  Also set a different progress log file
-    so you can store the results of your second run separately.  See the
-    TEMPLATE.yaml for some examples.
-2.  Re-run pre-assemble.
-
-
-This process will perform an automatic cleanup on the items being
-re-accessioned (but will leave your objects registered).
-
-## Cleanup
-
-### Removing Items From DOR and other locations
-
-If you need to cleanup accessioned content, you can do this in two ways. The
-first will use the YAML configuration file and the associated progress log
-file to indicate which objects you would like removed. Note that the YAML
-configuration file specifies the location of the progress log file. If the
-progress log file has been moved or changed, this will not work correctly. You
-should confirm that your YAML configuration file still correctly specifies the
-location of "progress_log_file". The script will open the YAML configuration,
-find the progress log, read it to find the actual completed objects, and will
-then execute cleanup on those objects. Use the following script to perform a
-cleanup:
-
-    ROBOT_ENVIRONMENT=xxx bin/cleanup YAML_PROGRESS_LOG_FILE steps
-
-where steps is a comma delimited list of any or all of the following steps
-defined below:
-
-- symlinks: remove symlinks from the /dor/workspace
-- stage: removed staged files (typically stored in /dor/assembly, but the specific
-    area is defined as 'staging_dir' in the YAML file)
-- dor: remove objects from Fedora
-- stacks: remove files from the stacks that were shelved during accessioning ...
-    note this step must be run from a server (such as sul-lyberservices-test)
-    and you must be able to authenticate to the relevant stacks server
-- workflows: remove the assemblyWF and accessionWF workflows for the objects
-
-You can also specify the environment using ROBOT_ENVIRONMENT, just as with a
-pre-assemble run. Since this script is destructive, you will need to confirm
-each step. It is always best to run this script on the test (or production)
-server, since then it will have full access to the stacks.
-
-For example, when on sul-lyberservices-test:
-
-```
-ROBOT_ENVIRONMENT=test bin/cleanup tmp/revs.yaml symlinks,stage,dor
-```
-
-The second way to perform a cleanup is from a `bin/console` prompt running the
-appropriate environment. You can then specify a specific list of druids and
-steps (as an array of symbols) to cleanup:
-
-e.g.
-
-```
-$ ROBOT_ENVIRONMENT=test bin/console
-
-druids=%w{druid:aa111aa1111 druid:bb222bb2222}
-steps=[:symlinks,:stage,:dor,:stacks,:workflows]
-Assembly::Utils.cleanup(:druids=>druids,:steps=>steps,:dry_run=>true)
-```
 
 ### Loading YAML Configuration
 
