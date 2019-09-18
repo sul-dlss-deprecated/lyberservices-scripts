@@ -35,7 +35,6 @@ module PreAssembly
       :pid,
       :druid,
       :dor_object,
-      :reg_by_pre_assembly,
       :label,
       :manifest_row,
       :source_id,
@@ -65,7 +64,6 @@ module PreAssembly
       @pid                 = ''
       @druid               = nil
       @dor_object          = nil
-      @reg_by_pre_assembly = false
       @label               = Dor::Config.dor.default_label
       @source_id           = nil
       @manifest_row        = nil
@@ -228,7 +226,6 @@ module PreAssembly
       return unless @project_style[:should_register]
       log "    - register(#{@pid})"
       @dor_object          = register_in_dor(registration_params)
-      @reg_by_pre_assembly = true
     end
 
     def register_in_dor(params)
