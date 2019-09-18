@@ -54,10 +54,6 @@ GEM
       mime-types (> 3)
       mini_exiftool
       nokogiri
-    assembly-utils (1.5.0)
-      dor-services (~> 5.5)
-      druid-tools (>= 0.2.6)
-      nokogiri
     awesome_print (1.8.0)
     builder (3.2.3)
     bundler-audit (0.6.1)
@@ -396,7 +392,6 @@ DEPENDENCIES
   actionpack (~> 5.2)
   assembly-image
   assembly-objectfile (>= 1.7.2)
-  assembly-utils
   awesome_print
   byebug
   capistrano (~> 3)

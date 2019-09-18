@@ -727,7 +727,7 @@ e.g.
 $ ROBOT_ENVIRONMENT=test bin/console
 
 config_filename='/thumpers/dpgthumper2-smpl/SC1017_SOHP/sohp_prod_accession.yaml'
-config=Assembly::Utils.load_config(config_filename)
+config=YAML.load(IO.read(filename))
 progress_filename=config['progress_log_file']
 ```
 
@@ -750,7 +750,7 @@ failed_druids=PreAssembly::Utils.get_druids_from_log('/dor/preassembly/sohp_acce
 ```
 
 If you want to find druids by source_id, use the utility method
-Assembly::Utils.get_druids_by_sourceid(source_ids=[]) to do this. You can then
+PreAssembly::Utils.get_druids_by_sourceid(source_ids=[]) to do this. You can then
 use the array of druids in the other utility methods.
 
 e.g.
@@ -758,7 +758,7 @@ e.g.
     $ ROBOT_ENVIRONMENT=test bin/console
 
     source_ids=%w{foo:123 bar:456}
-    druids=Assembly::Utils.get_druids_by_sourceid(source_ids)
+    druids=PreAssembly::Utils.get_druids_by_sourceid(source_ids)
 
 ## Remediation
 
