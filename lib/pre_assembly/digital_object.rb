@@ -70,9 +70,9 @@ module PreAssembly
       @source_id           = nil
       @manifest_row        = nil
 
-      @content_md_file     = Assembly::CONTENT_MD_FILE
-      @technical_md_file   = Assembly::TECHNICAL_MD_FILE
-      @desc_md_file        = Assembly::DESC_MD_FILE
+      @content_md_file     = CONTENT_MD_FILE
+      @technical_md_file   = TECHNICAL_MD_FILE
+      @desc_md_file        = DESC_MD_FILE
       @content_md_xml      = ''
       @technical_md_xml    = ''
       @desc_md_xml         = ''

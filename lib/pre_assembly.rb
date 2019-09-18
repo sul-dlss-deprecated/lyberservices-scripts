@@ -14,8 +14,8 @@ require 'pre_assembly/digital_object'
 require 'pre_assembly/object_file'
 require 'pre_assembly/remediation/remediate'
 require 'pre_assembly/smpl_precontent_metadata'
+require 'pre_assembly/utils'
 
-require 'assembly-utils'
 require 'assembly-image'
 require 'rest_client'
 require 'honeybadger'
@@ -31,6 +31,18 @@ CONTENT_TYPE_TAG_MAPPING = {
   'Manuscript (image-only)'=>:book_as_image,
   'Map'=>:map
 }
+
+# Default assembly directory, can be overwritten by the value set in the project specific YAML configuration
+ASSEMBLY_WORKSPACE = '/dor/assembly'
+
+# Default technical metadata file present at root of each object directory
+TECHNICAL_MD_FILE = 'technicalMetadata.xml'
+
+# Default content metadata file present at root of each object directory
+CONTENT_MD_FILE = 'contentMetadata.xml'
+
+# Default descriptive metadata file present at root of each object directory
+DESC_MD_FILE = 'descMetadata.xml'
 
 module PreAssembly
   def self.retry_handler(method_name, logger, params = {})

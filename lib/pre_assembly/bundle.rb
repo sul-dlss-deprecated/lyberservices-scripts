@@ -101,7 +101,7 @@ module PreAssembly
       if !@desc_md_template.nil? && !(Pathname.new @desc_md_template).absolute? # check for a desc MD template being defined and not being absolute
          @desc_md_template = path_in_bundle(@desc_md_template) # set it relative to the bundle
       end
-      @staging_dir = Assembly::ASSEMBLY_WORKSPACE if @staging_dir.nil? # if the user didn't supply a staging_dir, use the default
+      @staging_dir = ASSEMBLY_WORKSPACE if @staging_dir.nil? # if the user didn't supply a staging_dir, use the default
       @progress_log_file = File.join(File.dirname(@config_filename),File.basename(@config_filename,'.yaml') + '_progress.yaml') if @progress_log_file.nil? # if the user didn't supply a progress log file, use the yaml config file as a base, and add '_progress'
     end
 
