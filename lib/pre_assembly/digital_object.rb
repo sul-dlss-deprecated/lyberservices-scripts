@@ -234,7 +234,7 @@ module PreAssembly
     def register_in_dor(params)
       with_retries(max_tries: Dor::Config.dor.num_attempts, rescue: Exception, handler: PreAssembly.retry_handler('REGISTER_IN_DOR', method(:log), params)) do
         result = begin
-          Dor::RegistrationService.register_object params
+          Dor::Services::Client.objects.register params: params
         rescue Exception => e
           source_id="#{@project_name}:#{@source_id}"
           log "      ** REGISTER FAILED ** with '#{e.message}' ... deleting object #{@pid} and source id #{source_id} and trying attempt #{i} of #{Dor::Config.dor.num_attempts} in #{Dor::Config.dor.sleep_time} seconds"
@@ -270,7 +270,7 @@ module PreAssembly
         :source_id    => { @project_name => @source_id },
         :pid          => @pid,
         :label        => @label.blank? ? Dor::Config.dor.default_label : @label,
-        :tags         => tags,
+        :tag          => tags,
       }
     end
 

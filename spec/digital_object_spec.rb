@@ -151,8 +151,8 @@ describe PreAssembly::DigitalObject do
       rps = @dobj.registration_params
       expect(rps).to             be_kind_of Hash
       expect(rps[:source_id]).to be_kind_of Hash
-      expect(rps[:tags]).to      be_kind_of Array
-      expect(rps[:tags]).to eq(["Project : ProjectBar"])
+      expect(rps[:tag]).to      be_kind_of Array
+      expect(rps[:tag]).to eq(["Project : ProjectBar"])
       expect(rps[:label]).to eq("LabelQuux")
     end
 
@@ -162,22 +162,22 @@ describe PreAssembly::DigitalObject do
       dobj_with_tag = PreAssembly::DigitalObject.new @ps
       rps = dobj_with_tag.registration_params
       expect(rps).to             be_kind_of Hash
-      expect(rps[:tags]).to      be_kind_of Array
-      expect(rps[:tags]).to eq(["Project : ProjectBar", "Foo : Bar"])
+      expect(rps[:tag]).to      be_kind_of Array
+      expect(rps[:tag]).to eq(["Project : ProjectBar", "Foo : Bar"])
 
       @ps[:apply_tag]='Foo : Bar'
       dobj_with_tag = PreAssembly::DigitalObject.new @ps
       rps = dobj_with_tag.registration_params
       expect(rps).to             be_kind_of Hash
-      expect(rps[:tags]).to      be_kind_of Array
-      expect(rps[:tags]).to eq(["Project : ProjectBar", "Foo : Bar"])
+      expect(rps[:tag]).to      be_kind_of Array
+      expect(rps[:tag]).to eq(["Project : ProjectBar", "Foo : Bar"])
 
       @ps[:apply_tag]=nil
       dobj_with_tag = PreAssembly::DigitalObject.new @ps
       rps = dobj_with_tag.registration_params
       expect(rps).to             be_kind_of Hash
-      expect(rps[:tags]).to      be_kind_of Array
-      expect(rps[:tags]).to eq(["Project : ProjectBar"])
+      expect(rps[:tag]).to      be_kind_of Array
+      expect(rps[:tag]).to eq(["Project : ProjectBar"])
 
     end
 
