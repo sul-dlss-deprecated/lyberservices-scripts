@@ -135,7 +135,7 @@ cap prod deploy # for lyberservices-prod
     the lyberservices-scripts directory, e.g.
 
 ```
-        ssh lyberadmin@sul-lyberadmin-test.stanford.edu
+        ssh scripts@sul-lyberservices-test.stanford.edu
         cd lyberservices-scripts/current
         ROBOT_ENVIRONMENT=test bin/discovery_report YAML_FILE
 ```
@@ -246,8 +246,8 @@ bin/pre-assemble YAML_FILE --limit=100 --resume
 
     See the example below:
 ```
-        ssh lyberadmin@sul-lyberservices-prod.stanford.edu
-        cd /home/lyberadmin/lyberservices-scripts/current
+        ssh scripts@sul-lyberservices-prod.stanford.edu
+        cd /home/scripts/lyberservices-scripts/current
         ROBOT_ENVIRONMENT=production nohup bin/pre-assemble YAML_FILE &
 ```
 
@@ -302,7 +302,7 @@ used.
 Here's a quick summary of the basic execution steps:
 
     # Goto VM and select environment
-    % ssh lyberadmin@lyberservices-prod
+    % ssh scripts@lyberservices-prod
     % export ROBOT_ENVIRONMENT=production
 
     # Goto project directory and copy YAML and related files
@@ -460,7 +460,7 @@ try loading the YAML again on the console to confirm.
     you are running on.
 
 4.  Be sure you have write access to the location you have specified for your
-    progress log file. When running as lyberadmin on the test and production
+    progress log file. When running as scripts on the test and production
     machines, you will NOT have write access to the thumper drivers. You
     should store your progress log file elsewhere, such as /dor/preassembly
 
@@ -500,7 +500,7 @@ try loading the YAML again on the console to confirm.
 7.  If 6b or 6c above, it is possible to spot check images to assess the
     problem:
 
-        $ ssh lyberadmin@lyberservices-prod
+        $ ssh scripts@lyberservices-prod
         $ cd ~/lyberservices-scripts/current
         $ ROBOT_ENVIRONMENT=production bin/console
         > a=Assembly::Image.new('/full/path/to/image')

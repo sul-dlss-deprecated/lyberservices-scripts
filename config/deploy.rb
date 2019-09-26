@@ -11,7 +11,7 @@ set :ssh_options, {
 ask :branch, proc { `git rev-parse --abbrev-ref HEAD`.chomp }.call
 
 # Default deploy_to directory is /var/www/my_app
-set :deploy_to, '/home/lyberadmin/lyberservices-scripts'
+set :deploy_to, '/home/scripts/lyberservices-scripts'
 
 # Default value for :scm is :git
 # set :scm, :git
@@ -36,5 +36,8 @@ set :linked_dirs, %w{log config/certs config/environments tmp vendor/bundle}
 
 # Default value for keep_releases is 5
 # set :keep_releases, 5
+
+# update shared_configs
+before 'deploy:cleanup', 'shared_configs:update'
 
 set :honeybadger_env, fetch(:stage)
