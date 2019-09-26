@@ -84,7 +84,7 @@ module PreAssembly
 
            end
 
-        rescue Exception => e
+        rescue StandardError => e
 
           @success=false
           @message="#{e.message}"
@@ -100,14 +100,15 @@ module PreAssembly
       def update_object_with_versioning
         open_version
         update_object if @success # only continue the process if everything is still good
-        close_version if @success # this will save the object too
+        close_version if @success
       end
 
       def update_object
         begin
           @success=remediate_logic # this method must be defined for your specific remediation passed in
           # note: the object is now saved when the version is closed
-        rescue Exception => e
+          @fobj.save!
+        rescue StandardError => e
           @success=false
           @message="Updating object failed: #{e.message}"
         end
@@ -120,7 +121,7 @@ module PreAssembly
            description: "pre-assembly remediation #{@description}"
          )
          @success=true
-       rescue Exception => e
+       rescue StandardError => e
          @success=false
          @message="Opening object failed: #{e.message}"
        end
@@ -130,7 +131,7 @@ module PreAssembly
        begin # try and close the version
          Dor::Services::Client.object(@fobj.id).version.close
          @success=true
-       rescue Exception => e
+       rescue StandardError => e
          @success=false
          @message="Closing object failed: #{e.message}"
        end
