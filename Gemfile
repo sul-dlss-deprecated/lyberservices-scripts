@@ -10,16 +10,13 @@ gem 'rdf'
 gem 'rest-client'
 gem 'retries'
 gem 'roo'
-gem 'ruby-prof'
 gem 'honeybadger', '~> 3.1'
 
 # Stanford gems
 gem 'assembly-image'
 gem 'assembly-objectfile', '>= 1.7.2' # 1.7.2 is the first version to support 3d content metadata generation
-gem 'assembly-utils'
 gem 'dir_validator'
-# gem 'dor-fetcher'   # not supported anymore; only used by devel/get_dor_and_sdr_versions.rb script, which is not regularly used
-gem 'dor-services', '< 6'
+gem 'dor-services', '~> 7'
 gem 'dor-services-client'
 gem 'dor-workflow-client'
 gem 'druid-tools'

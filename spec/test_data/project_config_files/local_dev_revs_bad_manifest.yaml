@@ -16,7 +16,7 @@ desc_md_template:     'mods_template.xml'
 progress_log_file:    'tmp/progress_revs.yaml'
 project_name:         'Revs'
 apo_druid_id:         'druid:qv648vd4392'
-set_druid_id:         
+set_druid_id:
   - 'druid:yt502zj0924'
   - 'druid:nt028fd5773'
 
@@ -50,10 +50,8 @@ manifest_cols:
 
 content_exclusion:    ~
 
-new_druid_tree_format: true
 validate_usage:       true
 show_progress:        true
 limit_n:              10
 uniqify_source_ids:   true
-cleanup:              true
 resume:               false

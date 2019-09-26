@@ -27,7 +27,6 @@ module PreAssembly
       :desc_md_template_xml,
       :init_assembly_wf,
       :content_md_creation,
-      :new_druid_tree_format,
       :staging_style,
       :smpl_manifest
     ]
@@ -36,10 +35,8 @@ module PreAssembly
       :pid,
       :druid,
       :dor_object,
-      :reg_by_pre_assembly,
       :label,
       :manifest_row,
-      :reaccession,
       :source_id,
       :content_md_file,
       :technical_md_file,
@@ -67,14 +64,13 @@ module PreAssembly
       @pid                 = ''
       @druid               = nil
       @dor_object          = nil
-      @reg_by_pre_assembly = false
       @label               = Dor::Config.dor.default_label
       @source_id           = nil
       @manifest_row        = nil
 
-      @content_md_file     = Assembly::CONTENT_MD_FILE
-      @technical_md_file   = Assembly::TECHNICAL_MD_FILE
-      @desc_md_file        = Assembly::DESC_MD_FILE
+      @content_md_file     = CONTENT_MD_FILE
+      @technical_md_file   = TECHNICAL_MD_FILE
+      @desc_md_file        = DESC_MD_FILE
       @content_md_xml      = ''
       @technical_md_xml    = ''
       @desc_md_xml         = ''
@@ -108,7 +104,7 @@ module PreAssembly
 
     # compute the base druid tree folder for this object
     def druid_tree_dir
-      @druid_tree_dir ||=  (@new_druid_tree_format ? DruidTools::Druid.new(@druid.id,@staging_dir).path() : Assembly::Utils.get_staging_path(@druid.id,@staging_dir))
+      @druid_tree_dir ||=  DruidTools::Druid.new(@druid.id,@staging_dir).path()
     end
 
     def druid_tree_dir=(value)
@@ -117,12 +113,12 @@ module PreAssembly
 
     # the content subfolder
     def content_dir
-      @content_dir ||= (@new_druid_tree_format ? File.join(druid_tree_dir,'content') : druid_tree_dir)
+      @content_dir ||= File.join(druid_tree_dir,'content')
     end
 
     # the metadata subfolder
     def metadata_dir
-      @metadata_dir ||=  (@new_druid_tree_format ? File.join(druid_tree_dir,'metadata') : druid_tree_dir)
+      @metadata_dir ||=  File.join(druid_tree_dir,'metadata')
     end
 
     ####
@@ -136,7 +132,6 @@ module PreAssembly
       log "  - pre_assemble(#{@source_id}) started"
       determine_druid
 
-      prepare_for_reaccession if @reaccession
       register
       add_dor_object_to_set
       stage_files
@@ -231,13 +226,12 @@ module PreAssembly
       return unless @project_style[:should_register]
       log "    - register(#{@pid})"
       @dor_object          = register_in_dor(registration_params)
-      @reg_by_pre_assembly = true
     end
 
     def register_in_dor(params)
       with_retries(max_tries: Dor::Config.dor.num_attempts, rescue: Exception, handler: PreAssembly.retry_handler('REGISTER_IN_DOR', method(:log), params)) do
         result = begin
-          Dor::RegistrationService.register_object params
+          Dor::Services::Client.objects.register params: params
         rescue Exception => e
           source_id="#{@project_name}:#{@source_id}"
           log "      ** REGISTER FAILED ** with '#{e.message}' ... deleting object #{@pid} and source id #{source_id} and trying attempt #{i} of #{Dor::Config.dor.num_attempts} in #{Dor::Config.dor.sleep_time} seconds"
@@ -273,7 +267,7 @@ module PreAssembly
         :source_id    => { @project_name => @source_id },
         :pid          => @pid,
         :label        => @label.blank? ? Dor::Config.dor.default_label : @label,
-        :tags         => tags,
+        :tag          => tags,
       }
     end
 
@@ -297,28 +291,6 @@ module PreAssembly
 
     def add_collection_relationship_params(druid)
       [:is_member_of_collection, "info:fedora/#{druid}"]
-    end
-
-    def prepare_for_reaccession
-      # Used during a re-accession, will remove symlinks in /dor/workspace, files from the stacks and content in /dor/assembly, workflows
-      # but will not unregister the object
-      log "  - prepare_for_reaccession(#{@druid})"
-
-      Assembly::Utils.cleanup_object(@druid.druid,[:stacks,:stage,:symlinks])
-
-    end
-
-    def unregister
-      # Used during testing and development work to unregister objects created in -dev.
-      # Do not run unless the object was registered by pre-assembly.
-      return unless @reg_by_pre_assembly
-
-      log "  - unregister(#{@pid})"
-
-      Assembly::Utils.unregister(@pid)
-
-      @dor_object          = nil
-      @reg_by_pre_assembly = false
     end
 
     ####

@@ -3,7 +3,6 @@
 require 'csv'
 require 'ostruct'
 require 'pathname'
-# require 'ruby-prof' # necessary to get ruby profiling working, but causes issues/errors with rest-client if required
 
 module PreAssembly
 
@@ -43,15 +42,12 @@ module PreAssembly
       :show_progress,
       :limit_n,
       :uniqify_source_ids,
-      :cleanup,
       :resume,
       :config_filename,
       :validate_files,
-      :new_druid_tree_format,
       :validate_bundle_dir,
       :throttle_time,
       :staging_style,
-      :profile,
       :garbage_collect_each_n
     ]
 
@@ -80,8 +76,8 @@ module PreAssembly
     def initialize(params = {})
       # Unpack the user-supplied parameters, after converting
       # all hash keys and some hash values to symbols.
-      params = Assembly::Utils.symbolize_keys params
-      Assembly::Utils.values_to_symbols! params[:project_style]
+      params.deep_symbolize_keys!
+      params[:project_style].each { |k, v| params[:project_style][k] = v.to_sym if v.class == String }
       cmc          = params[:content_md_creation]
       cmc[:style]  = cmc[:style].to_sym
       params[:file_attr] ||= params[:publish_attr]
@@ -105,7 +101,7 @@ module PreAssembly
       if !@desc_md_template.nil? && !(Pathname.new @desc_md_template).absolute? # check for a desc MD template being defined and not being absolute
          @desc_md_template = path_in_bundle(@desc_md_template) # set it relative to the bundle
       end
-      @staging_dir = Assembly::ASSEMBLY_WORKSPACE if @staging_dir.nil? # if the user didn't supply a staging_dir, use the default
+      @staging_dir = ASSEMBLY_WORKSPACE if @staging_dir.nil? # if the user didn't supply a staging_dir, use the default
       @progress_log_file = File.join(File.dirname(@config_filename),File.basename(@config_filename,'.yaml') + '_progress.yaml') if @progress_log_file.nil? # if the user didn't supply a progress log file, use the yaml config file as a base, and add '_progress'
     end
 
@@ -123,9 +119,7 @@ module PreAssembly
 
     def setup_defaults
       @garbage_collect_each_n = 50 if @garbage_collect_each_n.nil? # when to run garbage collection manually
-      @profile = false if @profile.nil? # default to no profiling
       @validate_files = true if @validate_files.nil? # default to validating files if not provided
-      @new_druid_tree_format = true if @new_druid_tree_format.nil? # default to new style druid tree format
       @throttle_time = 0 if @throttle_time.nil? # no throttle time if not supplied
       @staging_style = 'copy' if @staging_style.nil? # staging style defaults to copy
       @project_style[:content_tag_override] = false if @project_style[:content_tag_override].nil? # default to false
@@ -139,7 +133,7 @@ module PreAssembly
 
     def load_skippables
       return unless @resume
-      docs = YAML.load_stream(Assembly::Utils.read_file(progress_log_file))
+      docs = YAML.load_stream(IO.read((progress_log_file)))
       docs = docs.documents if docs.respond_to? :documents
       docs.each do |yd|
         skippables[yd[:unadjusted_container]] = true if yd[:pre_assem_finished]
@@ -185,12 +179,10 @@ module PreAssembly
       [
         :config_filename,
         :validate_files,
-        :new_druid_tree_format,
         :staging_style,
         :validate_bundle_dir,
         :throttle_time,
         :apply_tag,
-        :profile,
         :garbage_collect_each_n
       ]
     end
@@ -201,8 +193,6 @@ module PreAssembly
       warning<<'* get_druid_from=druid_minter' if @project_style[:get_druid_from]==:druid_minter
       warning<<'* init_assembly_wf=false' unless @init_assembly_wf
       warning<<'* uniqify_source_ids=true' if @uniqify_source_ids
-      warning<<'* cleanup=true' if @cleanup
-      warning<<"* memory profiling enabled" if @profile
       puts "\n***DEVELOPER MODE WARNING: You have set some parameters typically only set by developers****\n#{warning.join("\n")}" if @show_progress && warning.size > 0
     end
 
@@ -307,8 +297,6 @@ module PreAssembly
 
       return unless bundle_directory_is_valid?
 
-      RubyProf.start if @profile # start profiling
-
       # load up the SMPL manifest if we are using that style
       if @content_md_creation[:style] == :smpl
         @smpl_manifest=PreAssembly::Smpl.new(:csv_filename=>@content_md_creation[:smpl_manifest],:bundle_dir=>@bundle_dir,:verbose=>false)
@@ -318,16 +306,8 @@ module PreAssembly
       load_provider_checksums
       process_manifest
       process_digital_objects
-      delete_digital_objects
 
       puts "#{Time.now}: Pre-assembly completed for #{@project_name}" if @show_progress
-
-      # stop profiling and print a graph profile to text
-      if @profile
-        result = RubyProf.stop
-        printer = RubyProf::GraphPrinter.new(result)
-        File.open('memory_report.txt','w') {|file| printer.print(file)}
-      end
 
       processed_pids
     end
@@ -360,20 +340,6 @@ module PreAssembly
         all_files_exist = dobj.object_files.map {|objfile| File.readable?(objfile.path)}
         return !all_files_exist.uniq.include?(false)
       end
-    end
-
-    ####
-    # Cleanup of objects and associated files in specified environment using logfile as input
-    ####
-    def cleanup(steps=[],dry_run=false)
-      log "cleanup()"
-      if File.exists?(@progress_log_file)
-        druids=Assembly::Utils.get_druids_from_log(@progress_log_file)
-      else
-        puts "#{@progress_log_file} not found!  Cannot proceed"
-        return
-      end
-      Assembly::Utils.cleanup(:druids=>druids,:steps=>steps,:dry_run=>dry_run)
     end
 
     ####
@@ -436,7 +402,6 @@ module PreAssembly
           :unadjusted_container => c,
           :stageable_items      => stageables,
           :object_files         => object_files,
-          :new_druid_tree_format => @new_druid_tree_format,
           :staging_style        => @staging_style,
           :smpl_manifest        => @smpl_manifest
         }
@@ -708,7 +673,6 @@ module PreAssembly
           # Try to pre_assemble the digital object.
           load_checksums(dobj)
           validate_files(dobj) if @validate_files
-          dobj.reaccession=true if !@accession_items.nil? && @accession_items[:reaccession] # if we are reaccessioning items, then go ahead and clear each one out
           dobj.pre_assemble(@desc_md_template_xml)
           # Indicate that we finished.
           dobj.pre_assem_finished = true
@@ -777,14 +741,6 @@ module PreAssembly
         :timestamp            => Time.now.strftime('%Y-%m-%d %H:%I:%S')
       }
     end
-
-    def delete_digital_objects
-      return unless @cleanup
-      # During development, delete objects that we register.
-      log "delete_digital_objects()"
-      @digital_objects.each { |dobj| dobj.unregister }
-    end
-
 
     ####
     # File and directory utilities.

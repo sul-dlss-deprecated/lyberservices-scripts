@@ -13,7 +13,6 @@ describe PreAssembly::DigitalObject do
       :project_style => {:should_register=>true},
       :content_md_creation => {},
       :bundle_dir    => 'spec/test_data/bundle_input_g',
-      :new_druid_tree_format => true,
       :staging_style=>'copy'
     }
     @dobj         = PreAssembly::DigitalObject.new @ps
@@ -152,8 +151,8 @@ describe PreAssembly::DigitalObject do
       rps = @dobj.registration_params
       expect(rps).to             be_kind_of Hash
       expect(rps[:source_id]).to be_kind_of Hash
-      expect(rps[:tags]).to      be_kind_of Array
-      expect(rps[:tags]).to eq(["Project : ProjectBar"])
+      expect(rps[:tag]).to      be_kind_of Array
+      expect(rps[:tag]).to eq(["Project : ProjectBar"])
       expect(rps[:label]).to eq("LabelQuux")
     end
 
@@ -163,22 +162,22 @@ describe PreAssembly::DigitalObject do
       dobj_with_tag = PreAssembly::DigitalObject.new @ps
       rps = dobj_with_tag.registration_params
       expect(rps).to             be_kind_of Hash
-      expect(rps[:tags]).to      be_kind_of Array
-      expect(rps[:tags]).to eq(["Project : ProjectBar", "Foo : Bar"])
+      expect(rps[:tag]).to      be_kind_of Array
+      expect(rps[:tag]).to eq(["Project : ProjectBar", "Foo : Bar"])
 
       @ps[:apply_tag]='Foo : Bar'
       dobj_with_tag = PreAssembly::DigitalObject.new @ps
       rps = dobj_with_tag.registration_params
       expect(rps).to             be_kind_of Hash
-      expect(rps[:tags]).to      be_kind_of Array
-      expect(rps[:tags]).to eq(["Project : ProjectBar", "Foo : Bar"])
+      expect(rps[:tag]).to      be_kind_of Array
+      expect(rps[:tag]).to eq(["Project : ProjectBar", "Foo : Bar"])
 
       @ps[:apply_tag]=nil
       dobj_with_tag = PreAssembly::DigitalObject.new @ps
       rps = dobj_with_tag.registration_params
       expect(rps).to             be_kind_of Hash
-      expect(rps[:tags]).to      be_kind_of Array
-      expect(rps[:tags]).to eq(["Project : ProjectBar"])
+      expect(rps[:tag]).to      be_kind_of Array
+      expect(rps[:tag]).to eq(["Project : ProjectBar"])
 
     end
 
@@ -233,32 +232,6 @@ describe PreAssembly::DigitalObject do
     end
 
   end
-
-  ####################
-
-  describe "unregister()" do
-
-    before(:each) do
-      @dobj.dor_object = 1234
-      allow(Assembly::Utils).to receive :delete_from_dor
-      allow(Assembly::Utils).to receive :set_workflow_step_to_error
-    end
-
-    it "should do nothing unless the digitial object was registered by pre-assembly" do
-      expect(@dobj).not_to receive :delete_from_dor
-      @dobj.reg_by_pre_assembly = false
-      @dobj.unregister
-    end
-
-    it "can exercise unregister(), with external calls stubbed" do
-      @dobj.reg_by_pre_assembly = true
-      @dobj.unregister
-      expect(@dobj.dor_object).to eq(nil)
-      expect(@dobj.reg_by_pre_assembly).to eq(false)
-    end
-
-  end
-
 
   ####################
 
@@ -398,22 +371,13 @@ describe PreAssembly::DigitalObject do
   end
 
   #########
-  describe "check the druid tree directories and content and metadata locations using both the new style and the old style" do
+  describe "check the druid tree directories and content and metadata locations " do
 
     it "should have the correct druid tree folders using the new style" do
       @dobj.druid = @druid
-      @dobj.new_druid_tree_format = true
       expect(@dobj.druid_tree_dir).to eq('gn/330/dv/6119/gn330dv6119')
       expect(@dobj.metadata_dir).to eq('gn/330/dv/6119/gn330dv6119/metadata')
       expect(@dobj.content_dir).to eq('gn/330/dv/6119/gn330dv6119/content')
-    end
-
-    it "should have the correct druid tree folders using the old style" do
-      @dobj.druid = @druid
-      @dobj.new_druid_tree_format = false
-      expect(@dobj.druid_tree_dir).to eq('gn/330/dv/6119')
-      expect(@dobj.metadata_dir).to eq('gn/330/dv/6119')
-      expect(@dobj.content_dir).to eq('gn/330/dv/6119')
     end
 
   end

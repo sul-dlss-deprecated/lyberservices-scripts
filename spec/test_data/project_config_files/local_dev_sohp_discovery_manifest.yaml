@@ -35,7 +35,7 @@ object_discovery:
   use_manifest:       true
   glob:               ~
   regex:              ~
-    
+
 stageable_discovery:
   use_container:      false
   glob:               '**/*'
@@ -49,10 +49,8 @@ manifest_cols:
 
 content_exclusion:    ~
 
-new_druid_tree_format: true
 validate_usage:       false
 show_progress:        true
 limit_n:              10
 uniqify_source_ids:   true
-cleanup:              true
 resume:               false

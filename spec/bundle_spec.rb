@@ -14,7 +14,7 @@ describe PreAssembly::Bundle do
       :proj_sohp_files_only   => 'spec/test_data/project_config_files/local_dev_sohp_files_only.yaml',
       :proj_sohp_files_and_folders   => 'spec/test_data/project_config_files/local_dev_sohp_files_and_folders.yaml',
       :proj_folder_manifest   => 'spec/test_data/project_config_files/local_dev_folder_manifest.yaml',
-      :proj_with_tag          => 'spec/test_data/project_config_files/local_dev_revs_old_druid_style.yaml'
+      :proj_with_tag          => 'spec/test_data/project_config_files/local_dev_revs_with_tag.yaml'
     }
     @yaml={}
     @yaml_filenames.each {|key,value| @yaml[key]=File.read(value) }
@@ -25,7 +25,7 @@ describe PreAssembly::Bundle do
     @ps = YAML.load @yaml[proj]
     @ps['config_filename']=@yaml_filenames[proj]
     @ps['show_progress']=false
-    @b  = PreAssembly::Bundle.new @ps
+    @b  = PreAssembly::Bundle.new @ps.deep_dup
   end
 
   ####################
@@ -274,7 +274,6 @@ describe PreAssembly::Bundle do
         :load_provider_checksums,
         :process_manifest,
         :process_digital_objects,
-        :delete_digital_objects,
       ]
       methods.each { |m| expect(@b).not_to receive(m) }
       @b.run_pre_assembly()
@@ -730,14 +729,6 @@ describe PreAssembly::Bundle do
 
   describe "objects_to_process()" do
 
-    it "should have the correct list of objects to re-accession if specified with only option" do
-      bundle_setup :proj_sohp3
-      @b.discover_objects
-      expect(@b.digital_objects.size).to eq(2)
-      o2p = @b.objects_to_process
-      expect(o2p.size).to eq(1)
-    end
-
     it "should have the correct list of objects to accession if specified with except option" do
       bundle_setup :proj_sohp4
       @b.discover_objects
@@ -745,7 +736,6 @@ describe PreAssembly::Bundle do
       o2p = @b.objects_to_process
       expect(o2p.size).to eq(0)
     end
-
 
     it "should return all objects if there are no skippables" do
       bundle_setup :proj_revs
@@ -789,7 +779,7 @@ describe PreAssembly::Bundle do
     end
 
     it "should set the staging_dir to the default value if not specified in the YAML" do
-      default_staging_directory=Assembly::ASSEMBLY_WORKSPACE
+      default_staging_directory=ASSEMBLY_WORKSPACE
       if File.exists?(default_staging_directory) && File.directory?(default_staging_directory)
         bundle_setup :proj_sohp2
         @b.setup_paths
@@ -816,29 +806,6 @@ describe PreAssembly::Bundle do
         :timestamp            => Time.now.strftime('%Y-%m-%d %H:%I:%S')
       }
       expect(@b.log_progress_info(dobj)).to eq(exp)
-    end
-
-  end
-
-  ####################
-
-  describe "delete_digital_objects()" do
-
-    before(:each) do
-      bundle_setup :proj_revs
-      @b.digital_objects = []
-    end
-
-    it "should do nothing if @cleanup == false" do
-      @b.cleanup = false
-      expect(@b.digital_objects).not_to receive :each
-      @b.delete_digital_objects
-    end
-
-    it "should do something if @cleanup == true" do
-      @b.cleanup = true
-      expect(@b.digital_objects).to receive :each
-      @b.delete_digital_objects
     end
 
   end
@@ -935,40 +902,6 @@ describe PreAssembly::Bundle do
     it "source_id_suffix() should look like an integer if making unique source IDs" do
       @b.uniqify_source_ids = true
       expect(@b.source_id_suffix).to match(/^_\d+$/)
-    end
-
-    it "symbolize_keys() should handle various data structures correctly" do
-      tests = [
-        [ {}, {} ],
-        [ [], [] ],
-        [ [1,2], [1,2] ],
-        [ 123, 123 ],
-        [
-          { :foo => 123, 'bar' => 456 },
-          { :foo => 123, :bar  => 456 }
-        ],
-        [
-          { :foo => [1,2,3], 'bar' => { 'x' => 99, 'y' => { 'AA' => 22, 'BB' => 33 } } },
-          { :foo => [1,2,3], :bar  => { :x  => 99, :y  => { :AA  => 22, :BB  => 33 } } },
-        ],
-
-      ]
-      tests.each do |input, exp|
-        expect(Assembly::Utils.symbolize_keys(input)).to eq(exp)
-      end
-    end
-
-    it "values_to_symbols!() should convert string values to symbols" do
-      tests = [
-        [ {}, {} ],
-        [
-          { :a => 123, :b => 'b', :c => 'ccc' },
-          { :a => 123, :b => :b , :c => :ccc  },
-        ],
-      ]
-      tests.each do |input, exp|
-        expect(Assembly::Utils.values_to_symbols!(input)).to eq(exp)
-      end
     end
 
   end

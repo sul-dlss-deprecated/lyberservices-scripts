@@ -54,12 +54,11 @@ module PreAssembly
       puts "Using SMPL manifest for contentMetadata: #{File.join(@bundle_dir,@content_md_creation[:smpl_manifest])}" if using_smpl_manifest
 
       if @accession_items
-        puts "NOTE: reaccessioning with object cleanup" if @accession_items[:reaccession]
         puts "You are processing specific objects only" if @accession_items[:only]
         puts "You are processing all discovered except for specific objects" if @accession_items[:except]
       end
       if @project_style[:should_register] # confirm the supplied APO
-        puts report_error_message("Specified APO #{@apo_druid_id} does not exist or the specified object does exist but is not an APO") if Assembly::Utils.is_apo?(@apo_druid_id) == false
+        puts report_error_message("Specified APO #{@apo_druid_id} is not an APO") unless Dor.find(druid).class == Dor::AdminPolicyObject
       end
       header="\nObject Container , Number of Items , Files with no ext, Files with 0 Size, Total Size, Files Readable , "
       header+="Label , Source ID , " if using_manifest
@@ -166,7 +165,7 @@ module PreAssembly
          end # end confirming registration
 
          if checking_sourceids # let's check for global source ID uniqueness
-           message += (Assembly::Utils.get_druids_by_sourceid(dobj.source_id).size == 0 ? " yes , " : report_error_message("**DUPLICATE**"))
+           message += (PreAssembly::Utils.get_druids_by_sourceid(dobj.source_id).size == 0 ? " yes , " : report_error_message("**DUPLICATE**"))
          end
 
          puts message

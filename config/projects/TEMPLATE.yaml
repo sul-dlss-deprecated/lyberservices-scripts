@@ -23,7 +23,7 @@ progress_log_file: ~                        # Optional - if left as nil a progre
                                             # Typically based on project name.  A fully qualified path.
                                             # Be sure to keep your progress log file somewhere useful and be aware
                                             # if you restart pre-assembly without using the --resume switch, it will be overwritten.
-                                            # You will need the progress log for cleanup and restarting.
+                                            # You will need the progress log for restarting.
                                             # PLEASE DO NOT PLACE THIS IN THE LOG FOLDER OF THE PRE-ASSEMBLY CODE FOLDER ON THE SERVER.  IT MAY BE DELETED IF YOU DO THIS.
                     '/dor/preassembly/progress_foo.yaml'  # this is an example of specifying an alternate location
 
@@ -213,19 +213,15 @@ stageable_discovery:
 # Restrict objects to be accessioned when using the discovery method
 ####
 accession_items:   ~         # Only valid for projects that do *not* use a manifest.
-                            # Used if you need to accession or re-accession only specific objects.
+                            # Used if you need to accession only specific objects.
                             # You can supply a list of container names, and indicate if this list is exlcusionary
                             # or inclusionary.  In other words, do you want to *only* accession the named items, or accession
-                            # everything *except* those listed? You can also specify if this is a re-accession, in which case the
-                            # items will be reset (but not unregistered from DOR) before accessioning again.
+                            # everything *except* those listed?
                             # If you specify ~, all items will be accessioned and you can leave off the "only" and "except" parameters.
                             # Note that you will probably also want to log this new run using a different progress log file.
                             # In the "only" and "except" list, you should use names that exactly match the folder names in your bundle_dir,
                             # one per line, indented under "only" or "except" and preceeded by a dash as shown in the examples below.
-                            # If 'should_register: true', and you want to run a re-accession, then you should create a new manifest file (see the README)
                             # For a normal run (or if 'should_register: true'), set "accession_items" to ~, which will process all items.
-                            # Note that you can run a full re-accession for all items by simply leaving off the "only" and "except" lists, but
-                            # still specifying a "reaccession: true".  Do not specify both "only" and "except" unless you like flying experimental homebuilt aircraft.
                             # Examples below:
   only:
     - 'aa111aa1111'
@@ -233,10 +229,6 @@ accession_items:   ~         # Only valid for projects that do *not* use a manif
   except:
     - 'aa111aa1111'
     - 'bb222bb2222'             # this is an example of two objects that will be ignored, put them one per line, prefixed by a space, a dash, and space, add quotes around each item
-
-  reaccession: true            # If running a re-accession, set this to true so that a cleanup will be performed, if this is a first accession attempt for these objects, set it to false or ~ or leave it off
-                               # If set to true, the the files will be removed for /dor/assembly, /dor/workspace and the stacks before accessioning again.  Objects will *not* be re-registered, so this only works with
-                               #  should_register=false
 
 ####
 # Additional materials accompaning the bundle.
@@ -335,11 +327,6 @@ init_assembly_wf: true   # Whether pre-assembly should initiate the assembly
 throttle_time        :  ~     # The number of seconds to sleep between each object.  Can be used to throttle the speed at which
                               #  pre-assembly runs.  If set to nil (or not set at all), no throttling is performed.
 
-new_druid_tree_format:  true # Determines druid tree directory format (defaults to "true").
-                              # Check with Lyberteam to determine appropriate style to use.  As of August 20, 2012, only old style is supported in production.
-                              # old style: /oo/000/oo/0001
-                              # new style  /oo/000/oo/0001/oo000oo0001/content and /oo/000/oo/0001/oo000oo0001/metadata
-
 compute_checksum:       true   # Whether pre-assembly should compute checksums.
 
 validate_usage:         true   # Whether pre-assembly should confirm that all expected
@@ -350,10 +337,6 @@ show_progress:          true   # Whether to print druids as they are pre-assembl
 uniqify_source_ids:     false  # If true, pre-assembly attacheds a timestamp to source
                            # IDs. Used during integration testing to avoid duplicate source ID errors that come from DOR.
 
-cleanup:                 false  # If true, pre-assembly deletes objects from DOR after
-                           # pre-assembly finishes. Relevant only during development.
-
-profile:                 false # NOT CURRENTLY WORKING...if true, then ruby profiling will be done for memory usage, defaults to false if left off
 garbage_collect_each_n:  50    # manually run garbage collection each time this number of objects is pre-assembled (defaults to 50 if left off)
 
 # These options provides a means to use the dir_validator gem to validate

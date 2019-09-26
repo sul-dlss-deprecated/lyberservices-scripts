@@ -22,7 +22,7 @@ describe "Pre-assembly integration" do
   ]
 
   PROJECTS.each do |p|
-     # The Revs Project tests try to register objects during integration tests, 
+     # The Revs Project tests try to register objects during integration tests,
      # and the SURI service tries to make a Fedora connection, breaking the tests.
      # Disable them for now so at least the other integration tests can run -- July 17, 2017 Peter Mangiafico
     if p.match(/(revs)/)
@@ -42,35 +42,35 @@ describe "Pre-assembly integration" do
         :n_objects => 3,
         :exp_files => [
           [1, 'content/*.tif'],
-          [1, "metadata/#{Assembly::CONTENT_MD_FILE}"],
-          [1, "metadata/#{Assembly::DESC_MD_FILE}"],
-          [0, "metadata/#{Assembly::TECHNICAL_MD_FILE}"],
+          [1, "metadata/#{CONTENT_MD_FILE}"],
+          [1, "metadata/#{DESC_MD_FILE}"],
+          [0, "metadata/#{TECHNICAL_MD_FILE}"],
         ],
       },
       :revs_old_druid_style => {
         :n_objects => 3,
         :exp_files => [
           [1, '*.tif'],
-          [1, "#{Assembly::CONTENT_MD_FILE}"],
-          [1, "#{Assembly::DESC_MD_FILE}"],
-          [0, "metadata/#{Assembly::TECHNICAL_MD_FILE}"],
+          [1, "#{CONTENT_MD_FILE}"],
+          [1, "#{DESC_MD_FILE}"],
+          [0, "metadata/#{TECHNICAL_MD_FILE}"],
         ],
       },
       :revs_no_contentMetadata => {
         :n_objects => 3,
         :exp_files => [
           [1, '*.tif'],
-          [0, "#{Assembly::CONTENT_MD_FILE}"],
-          [1, "#{Assembly::DESC_MD_FILE}"],
-          [0, "metadata/#{Assembly::TECHNICAL_MD_FILE}"],
+          [0, "#{CONTENT_MD_FILE}"],
+          [1, "#{DESC_MD_FILE}"],
+          [0, "metadata/#{TECHNICAL_MD_FILE}"],
         ],
       },
       :gould => {
         :n_objects => 3,
         :exp_files => [
           [3, 'content/00/*.jpg'],
-          [1, "metadata/#{Assembly::CONTENT_MD_FILE}"],
-          [0, "metadata/#{Assembly::TECHNICAL_MD_FILE}"],
+          [1, "metadata/#{CONTENT_MD_FILE}"],
+          [0, "metadata/#{TECHNICAL_MD_FILE}"],
         ],
       },
       :sohp => {
@@ -86,9 +86,9 @@ describe "Pre-assembly integration" do
           [0, 'content/*_sl.mp3.md5'],
           [0, 'content/*_sl_techmd.xml'],
           [1, 'content/*.pdf'],
-          [1, "metadata/#{Assembly::CONTENT_MD_FILE}"],
-          [1, "metadata/#{Assembly::TECHNICAL_MD_FILE}"],
-          [0, "metadata/#{Assembly::DESC_MD_FILE}"],
+          [1, "metadata/#{CONTENT_MD_FILE}"],
+          [1, "metadata/#{TECHNICAL_MD_FILE}"],
+          [0, "metadata/#{DESC_MD_FILE}"],
         ],
       },
       :sohp_discovery_manifest => {
@@ -104,9 +104,9 @@ describe "Pre-assembly integration" do
           [0, 'content/*_sl.mp3.md5'],
           [0, 'content/*_sl_techmd.xml'],
           [1, 'content/*.pdf'],
-          [1, "metadata/#{Assembly::CONTENT_MD_FILE}"],
-          [1, "metadata/#{Assembly::TECHNICAL_MD_FILE}"],
-          [1, "metadata/#{Assembly::DESC_MD_FILE}"],
+          [1, "metadata/#{CONTENT_MD_FILE}"],
+          [1, "metadata/#{TECHNICAL_MD_FILE}"],
+          [1, "metadata/#{DESC_MD_FILE}"],
         ],
       },
     }
@@ -125,7 +125,7 @@ describe "Pre-assembly integration" do
     # Setup the bundle for a project and run pre-assembly.
     setup_bundle proj
     @pids = @b.run_pre_assembly
-    determine_staged_druid_trees(@b.new_druid_tree_format)
+    determine_staged_druid_trees
 
     # Run checks.
     check_n_of_objects
@@ -145,14 +145,13 @@ describe "Pre-assembly integration" do
     # Load the project's YAML config file.
     yaml_file = "#{PRE_ASSEMBLY_ROOT}/spec/test_data/project_config_files/local_dev_#{proj}.yaml"
     yaml      = YAML.load_file yaml_file
-    @params   = Assembly::Utils.symbolize_keys yaml
+    @params = yaml.deep_symbolize_keys
     # Create a temp dir to serve as the staging area.
     @temp_dir = Dir.mktmpdir "#{proj}_integ_test_", 'tmp'
 
     # Override some params.
     @params[:staging_dir]   = @temp_dir
     @params[:show_progress] = false
-    @params[:cleanup] = false
     @params[:bundle_dir] = File.join(PRE_ASSEMBLY_ROOT,@params[:bundle_dir])
     @params[:validate_bundle_dir][:code] = File.join(PRE_ASSEMBLY_ROOT, @params[:validate_bundle_dir][:code]) if @params[:validate_bundle_dir]
     # Create the bundle.
@@ -164,13 +163,9 @@ describe "Pre-assembly integration" do
     @exp_files = exp[:exp_files]
   end
 
-  def determine_staged_druid_trees(new_druid_tree_format)
+  def determine_staged_druid_trees
     # Determine the druid tree paths in the staging directory.
-    if new_druid_tree_format
-      @druid_trees = @pids.map { |pid| DruidTools::Druid.new(pid,@temp_dir).path() }
-    else
-      @druid_trees = @pids.map { |pid| Assembly::Utils.get_staging_path(pid,@temp_dir) }
-    end
+    @druid_trees = @pids.map { |pid| DruidTools::Druid.new(pid,@temp_dir).path() }
   end
 
 
@@ -202,7 +197,10 @@ describe "Pre-assembly integration" do
   def cleanup_dor_objects
     return unless @b.project_style[:should_register]
     @pids.each do |pid|
-      Assembly::Utils.unregister(pid)
+      Dor::Config.fedora.client["objects/#{pid}"].delete
+      Dor::SearchService.solr.delete_by_id(pid)
+      Dor::SearchService.solr.commit
+      Dor::Workflow::Client.new(url: Dor::Config.workflow.url).delete_all_workflows(pid)
     end
   end
 
