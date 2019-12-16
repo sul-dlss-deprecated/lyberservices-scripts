@@ -20,8 +20,8 @@ rvm:
 
 before_install:
   # Update to latest rubygems -- for ruby 2.5.3
-  - gem update --system
+  - yes | gem update --system
   # Get bundler 2.0 for ruby 2.6.4
-  - gem install bundler
+  # - gem install bundler
 
 bundler_args: --without production deployment
