@@ -661,7 +661,7 @@ describe PreAssembly::Bundle do
       expect(@b.digital_objects.size).to eq(3)
       # Before processing manifest: various attributes should be nil or default value.
       @b.digital_objects.each do |dobj|
-        expect(dobj.label).to        eq(Dor::Config.dor.default_label)
+        expect(dobj.label).to        eq(Settings.default_label)
         expect(dobj.source_id).to    eq(nil)
         expect(dobj.manifest_row).to eq(nil)
       end
@@ -669,7 +669,7 @@ describe PreAssembly::Bundle do
       @b.process_manifest
       @b.digital_objects.each do |dobj|
         expect(dobj.label).to be_kind_of        String
-        expect(dobj.label).not_to eq(Dor::Config.dor.default_label)
+        expect(dobj.label).not_to eq(Settings.default_label)
         expect(dobj.source_id).to be_kind_of    String
         expect(dobj.manifest_row).to be_kind_of Hash
       end

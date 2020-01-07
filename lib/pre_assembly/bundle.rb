@@ -552,7 +552,7 @@ module PreAssembly
         exception=nil
         tally = Hash.new(0)           # A tally to facilitate testing.
 
-        until i == Dor::Config.dor.num_attempts || success || failed_validation do
+        until i == Settings.num_attempts || success || failed_validation do
           i+=1
           begin
             tally = Hash.new(0)           # A tally to facilitate testing.
@@ -570,9 +570,9 @@ module PreAssembly
             success=true
           rescue Exception => e
             raise e if failed_validation # just raise the exception as normal if we have a failed file validation
-            log "      ** VALIDATE_FILES FAILED **, and trying attempt #{i} of #{Dor::Config.dor.num_attempts} in #{Dor::Config.dor.sleep_time} seconds"
+            log "      ** VALIDATE_FILES FAILED **, and trying attempt #{i} of #{Settings.num_attempts} in #{Settings.sleep_time} seconds"
             exception = e
-            sleep Dor::Config.dor.sleep_time
+            sleep Settings.sleep_time
           end
         end
 

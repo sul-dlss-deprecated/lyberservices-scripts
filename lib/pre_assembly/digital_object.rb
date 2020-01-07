@@ -64,7 +64,7 @@ module PreAssembly
       @pid                 = ''
       @druid               = nil
       @dor_object          = nil
-      @label               = Dor::Config.dor.default_label
+      @label               = Settings.default_label
       @source_id           = nil
       @manifest_row        = nil
 
@@ -159,7 +159,7 @@ module PreAssembly
     end
 
     def get_pid_from_suri
-      with_retries(max_tries: Dor::Config.dor.num_attempts, rescue: Exception, handler: PreAssembly.retry_handler('GET_PID_FROM_SURI', method(:log))) do
+      with_retries(max_tries: Settings.num_attempts, rescue: Exception, handler: PreAssembly.retry_handler('GET_PID_FROM_SURI', method(:log))) do
         result = Dor::SuriService.mint_id
         raise PreAssembly::UnknownError unless result.class == String
         result
@@ -229,12 +229,12 @@ module PreAssembly
     end
 
     def register_in_dor(params)
-      with_retries(max_tries: Dor::Config.dor.num_attempts, rescue: Exception, handler: PreAssembly.retry_handler('REGISTER_IN_DOR', method(:log), params)) do
+      with_retries(max_tries: Settings.num_attempts, rescue: Exception, handler: PreAssembly.retry_handler('REGISTER_IN_DOR', method(:log), params)) do
         result = begin
           Dor::Services::Client.objects.register params: params
         rescue Exception => e
           source_id="#{@project_name}:#{@source_id}"
-          log "      ** REGISTER FAILED ** with '#{e.message}' ... deleting object #{@pid} and source id #{source_id} and trying attempt #{i} of #{Dor::Config.dor.num_attempts} in #{Dor::Config.dor.sleep_time} seconds"
+          log "      ** REGISTER FAILED ** with '#{e.message}' ... deleting object #{@pid} and source id #{source_id} and trying attempt #{i} of #{Settings.num_attempts} in #{Settings.sleep_time} seconds"
           delete_objects_from_workspace_by_source_id(source_id)
           nil
         end
@@ -266,7 +266,7 @@ module PreAssembly
         :admin_policy => @apo_druid_id,
         :source_id    => { @project_name => @source_id },
         :pid          => @pid,
-        :label        => @label.blank? ? Dor::Config.dor.default_label : @label,
+        :label        => @label.blank? ? Settings.default_label : @label,
         :tag          => tags,
       }
     end
@@ -276,7 +276,7 @@ module PreAssembly
       return unless @set_druid_id && @project_style[:should_register]
       log "    - add_dor_object_to_set(#{@set_druid_id})"
 
-      with_retries(max_tries: Dor::Config.dor.num_attempts, rescue: Exception, handler: PreAssembly.retry_handler('ADD_DOR_OBJECT_TO_SET', method(:log))) do
+      with_retries(max_tries: Settings.num_attempts, rescue: Exception, handler: PreAssembly.retry_handler('ADD_DOR_OBJECT_TO_SET', method(:log))) do
         Array(@set_druid_id).each do |druid|
           @dor_object.add_relationship *add_member_relationship_params(druid)
           @dor_object.add_relationship *add_collection_relationship_params(druid)
@@ -468,7 +468,7 @@ module PreAssembly
       return unless @init_assembly_wf
       log "    - initialize_assembly_workflow()"
 
-       with_retries(max_tries: Dor::Config.dor.num_attempts, rescue: Exception, handler: PreAssembly.retry_handler('INITIALIZE_ASSEMBLY_WORKFLOW', method(:log))) do
+       with_retries(max_tries: Settings.num_attempts, rescue: Exception, handler: PreAssembly.retry_handler('INITIALIZE_ASSEMBLY_WORKFLOW', method(:log))) do
           api_client.create_workflow_by_name(@druid.druid, workflow_name)
        end
     end

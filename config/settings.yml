@@ -1,0 +1,10 @@
+dor_services:
+  url: 'https://test'
+  token: 'test'
+
+# sleep time in seconds between attempts to contact the dor service
+sleep_time: 0
+# the number of attempts to contact the dor web service before throwing an exception
+num_attempts: 1
+# the default label for an object that is registered when no label is provided in the manifest
+default_label: Untitled

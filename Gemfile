@@ -16,13 +16,14 @@ gem 'honeybadger', '~> 3.1'
 gem 'assembly-image'
 gem 'assembly-objectfile', '>= 1.7.2' # 1.7.2 is the first version to support 3d content metadata generation
 gem 'dir_validator'
-gem 'dor-services', '~> 7'
+gem 'dor-services', '~> 8'
 gem 'dor-services-client'
 gem 'dor-workflow-client'
 gem 'druid-tools'
 gem 'harvestdor'
 gem 'modsulator'
 gem 'stanford-mods'
+gem 'config'
 
 group :test do
   gem 'rspec', '~> 3.0'
