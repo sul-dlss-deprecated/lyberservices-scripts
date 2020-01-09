@@ -778,7 +778,11 @@ There can be other columns too -- they will be ignored.  They can be either
 full druids (with the prefix) or just the PIDs.  Save it somewhere the
 lyberservices-scripts code can read it.
 
-e.g. druid druid:oo000oo0001 druid:oo000oo0002 oo000oo0003
+e.g.
+druid
+druid:oo000oo0001
+druid:oo000oo0002
+oo000oo0003
 
 1.  Create a ruby file that defines exactly how you need to remediate each
     object.  The ruby file will define a method that has access to the
