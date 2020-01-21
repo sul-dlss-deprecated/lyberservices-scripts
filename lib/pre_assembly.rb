@@ -47,7 +47,7 @@ DESC_MD_FILE = 'descMetadata.xml'
 module PreAssembly
   def self.retry_handler(method_name, logger, params = {})
     Proc.new do |exception, attempt_number, total_delay|
-      logger.send "      ** #{method_name} FAILED **; with params of #{params.inspect}; and trying attempt #{attempt_number} of #{Dor::Config.dor.num_attempts}; delayed #{Dor::Config.dor.total_delay} seconds"
+      logger.send "      ** #{method_name} FAILED **; with params of #{params.inspect}; and trying attempt #{attempt_number} of #{Settings.num_attempts}; delayed #{Dor::Config.dor.total_delay} seconds"
     end
   end
 

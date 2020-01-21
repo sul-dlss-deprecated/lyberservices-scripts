@@ -1,11 +1,3 @@
+# In production, we put dor-services configuration here, but we don't depend on it in test.
 Dor::Config.configure do
-  dor do
-    sleep_time 0
-    num_attempts 1
-  end
-
-  dor_services do
-    url 'https://test'
-    token 'test'
-  end
 end
