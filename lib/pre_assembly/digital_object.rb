@@ -158,14 +158,6 @@ module PreAssembly
       @manifest_row[:druid]
     end
 
-    def get_pid_from_suri
-      with_retries(max_tries: Settings.num_attempts, rescue: Exception, handler: PreAssembly.retry_handler('GET_PID_FROM_SURI', method(:log))) do
-        result = Dor::SuriService.mint_id
-        raise PreAssembly::UnknownError unless result.class == String
-        result
-      end
-    end
-
     def get_pid_from_druid_minter
       DruidMinter.next
     end
