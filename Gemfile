@@ -26,10 +26,10 @@ gem 'stanford-mods'
 gem 'config'
 
 group :test do
+  gem 'coveralls', require: false
+  gem 'jettywrapper'
   gem 'rspec', '~> 3.0'
   gem 'solr_wrapper'
-  gem 'jettywrapper'
-  gem 'coveralls', require: false
 end
 
 group :deployment do
@@ -45,4 +45,6 @@ end
 
 group :development, :test do
   gem 'byebug'
+  gem 'rubocop', '~> 0.79.0'
+  gem 'rubocop-rspec'
 end
