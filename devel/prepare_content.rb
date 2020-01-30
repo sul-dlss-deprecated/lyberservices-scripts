@@ -152,7 +152,7 @@ else # either a report or symlink operation
   FileUtils.cd(base_content_folder)
   FileUtils.mkdir_p staging_folder unless report
   files_to_search = Dir.glob("**/**")
-  files_to_search.reject!{|f| f == '.' || f == '..' || f == '.DS_Store'}
+  files_to_search.reject! {|f| f == '.' || f == '..' || f == '.DS_Store'}
 
   csv_data.each do |row|
 
