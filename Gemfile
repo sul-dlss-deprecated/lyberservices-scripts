@@ -24,6 +24,7 @@ gem 'harvestdor'
 gem 'modsulator'
 gem 'stanford-mods'
 gem 'config'
+gem 'pry-byebug' # helpful for debugging problems
 
 group :test do
   gem 'coveralls', require: false
