@@ -138,6 +138,7 @@ module PreAssembly
       generate_content_metadata unless @content_md_creation[:style].to_s == 'none'
       generate_technical_metadata
       generate_desc_metadata
+      create_new_version if openable?
       initialize_assembly_workflow
       log "    - pre_assemble(#{@pid}) finished"
     end
@@ -451,28 +452,51 @@ module PreAssembly
       FileUtils.mkdir_p content_dir unless File.directory?(content_dir)
     end
 
+
+    private
+
+    ####
+    # Versioning for a re-accession.
+    ####
+
+    def openable?
+      version_client.openable?
+    end
+
+    def version_client
+      @version_client ||= Dor::Services::Client.object(@druid.druid).version
+    end
+
+    def current_object_version
+      @current_object_version ||= version_client.current.to_i
+    end
+
+    # When reaccessioning, we need to first open and close a version without kicking off accessionWF
+    def create_new_version
+      version_client.open(
+        significance: 'major',
+        description: 'lyberservices-scripts re-accession',
+        opening_user_name: 'lyberservices-scripts'
+      )
+      version_client.close(start_accession: false)
+    end
+
     ####
     # Initialize the assembly workflow.
     ####
 
+    # Call web service to add assemblyWF to the object in DOR.
     def initialize_assembly_workflow
-      # Call web service to add assemblyWF to the object in DOR.
       return unless @init_assembly_wf
       log "    - initialize_assembly_workflow()"
 
        with_retries(max_tries: Settings.num_attempts, rescue: Exception, handler: PreAssembly.retry_handler('INITIALIZE_ASSEMBLY_WORKFLOW', method(:log))) do
-          api_client.create_workflow_by_name(@druid.druid, workflow_name)
+          workflow_client.create_workflow_by_name(@druid.druid, 'assemblyWF', version: current_object_version)
        end
     end
 
-    private
-
-    def api_client
-      @api_client ||= Dor::Workflow::Client.new(url: Dor::Config.workflow.url)
-    end
-
-    def workflow_name
-      'assemblyWF'
+    def workflow_client
+      @workflow_client || Dor::Workflow::Client.new(url: Settings.workflow_url)
     end
   end
 end
