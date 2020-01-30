@@ -106,11 +106,11 @@ module PreAssembly
            message+=report_error_message("none") + " N/A ," # no items found and therefore existence gets an N/A
          else
            message+="#{dobj.object_files.count} ,"  # of items
-           total_size=(dobj.object_files.inject(0){|sum,obj| sum+obj.filesize})/1048576.0 # compute total size of all files in this object in MB
+           total_size=(dobj.object_files.inject(0) {|sum,obj| sum+obj.filesize})/1048576.0 # compute total size of all files in this object in MB
            total_size_all_files+=total_size # keep running tally of sizes of all discovered files
-           dobj.object_files.each{|obj| mimetypes[obj.mimetype]+=1} # keep a running tally of number of files by mimetype
-           filenames_with_no_extension=dobj.object_files.collect{|obj| File.extname(obj.path).empty?}.include?(true)
-           file_with_zero_size=dobj.object_files.collect{|obj| obj.filesize == 0}.include?(true)
+           dobj.object_files.each {|obj| mimetypes[obj.mimetype]+=1} # keep a running tally of number of files by mimetype
+           filenames_with_no_extension=dobj.object_files.collect {|obj| File.extname(obj.path).empty?}.include?(true)
+           file_with_zero_size=dobj.object_files.collect {|obj| obj.filesize == 0}.include?(true)
            message += (filenames_with_no_extension ? report_error_message("filenames have no extension") : " no , ")
            message += (file_with_zero_size ? report_error_message("a file has zero size") : " no , ")
            message += (total_size == 0 ? report_error_message("object is zero size") : " %.3f" % total_size.to_s + " MB , ") # total size of all files in MB
