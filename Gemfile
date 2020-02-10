@@ -6,7 +6,7 @@ gem 'csv-mapper'
 gem 'equivalent-xml'
 gem 'nokogiri'
 gem 'rake'
-gem 'rdf'
+# gem 'rdf' # seems we don't need this??
 gem 'rest-client'
 gem 'retries'
 gem 'roo'
@@ -14,7 +14,7 @@ gem 'honeybadger', '~> 3.1'
 
 # Stanford gems
 gem 'assembly-image'
-gem 'assembly-objectfile', '>= 1.7.2' # 1.7.2 is the first version to support 3d content metadata generation
+gem 'assembly-objectfile', '~> 1.9'
 gem 'dir_validator'
 gem 'dor-services', '~> 8'
 gem 'dor-services-client'
@@ -30,7 +30,6 @@ group :test do
   gem 'coveralls', require: false
   gem 'jettywrapper'
   gem 'rspec', '~> 3.0'
-  gem 'solr_wrapper'
 end
 
 group :deployment do
