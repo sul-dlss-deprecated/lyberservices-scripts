@@ -3,14 +3,12 @@ require 'assembly-objectfile'
 class PreAssembly::ObjectFile < Assembly::ObjectFile
 
   attr_accessor(
-    :relative_path,
     :exclude_from_content,
     :checksum
   )
 
   def initialize(params = {})
-    @path                 = params[:path]
-    @relative_path        = params[:relative_path]
+    super(params[:path], params) # we need to be sure to call Assembly::ObjectFile's constructor to get any defaults set there
     self.checksum         = params[:checksum]
     @exclude_from_content = params[:exclude_from_content]
   end
@@ -29,4 +27,3 @@ class PreAssembly::ObjectFile < Assembly::ObjectFile
   end
 
 end
-
