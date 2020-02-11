@@ -112,9 +112,7 @@ describe PreAssembly::DigitalObject do
     it "can exercise method using stubbed exernal calls" do
       @dobj.project_style[:should_register] = true
       allow(@dobj).to receive(:register_in_dor).and_return(1234)
-      expect(@dobj.dor_object).to eq(nil)
       @dobj.register
-      expect(@dobj.dor_object).to eq(1234)
     end
 
     it "can exercise registration_params() and get expected data structure" do
@@ -155,60 +153,7 @@ describe PreAssembly::DigitalObject do
 
   end
 
-  ####################
-
-  describe "add_dor_object_to_set()" do
-
-    it "should do nothing when @set_druid_id is false" do
-      fake = double('dor_object', :add_relationship => 11, :save => 22)
-      @dobj.dor_object = fake
-      @dobj.set_druid_id = nil
-      expect(@dobj).not_to receive(:add_member_relationship_params)
-      expect(@dobj).not_to receive(:add_collection_relationship_params)
-      expect(fake).not_to receive :add_relationship
-      @dobj.add_dor_object_to_set
-    end
-
-    it "should call add_relationship when not null the correct number of times for a single set druid passed in" do
-      fake = double('dor_object', :add_relationship => 11, :save => 22)
-      @dobj.dor_object = fake
-      expect(@dobj).to receive(:add_member_relationship_params).with('druid:mm111nn2222').exactly(1).times
-      expect(@dobj).to receive(:add_collection_relationship_params).with('druid:mm111nn2222').exactly(1).times
-      expect(fake).to receive(:add_relationship).exactly(2).times
-      @dobj.add_dor_object_to_set
-    end
-
-    it "should call add_relationship when not null the correct number of times for more than one set druids passed in" do
-      fake = double('dor_object', :add_relationship => 11, :save => 22)
-      @dobj.dor_object = fake
-      @dobj.set_druid_id = ['druid:oo000oo0001','druid:oo000oo0002']
-      expect(@dobj).to receive(:add_member_relationship_params).with('druid:oo000oo0001').exactly(1).times
-      expect(@dobj).to receive(:add_collection_relationship_params).with('druid:oo000oo0001').exactly(1).times
-      expect(@dobj).to receive(:add_member_relationship_params).with('druid:oo000oo0002').exactly(1).times
-      expect(@dobj).to receive(:add_collection_relationship_params).with('druid:oo000oo0002').exactly(1).times
-      expect(fake).to receive(:add_relationship).exactly(4).times
-      @dobj.add_dor_object_to_set
-    end
-
-    it "can exercise method using stubbed exernal calls" do
-      @dobj.dor_object = double('dor_object', :add_relationship => nil, :save => true)
-      @dobj.add_dor_object_to_set
-    end
-
-    it "add_relationship() returns expected data structure" do
-      @dobj.druid = @druid
-      exp1 = [:is_member_of, "info:fedora/druid:mm111nn2222"]
-      exp2 = [:is_member_of_collection, "info:fedora/druid:mm111nn2222"]
-      arps = expect(@dobj.add_member_relationship_params('druid:mm111nn2222')).to eq(exp1)
-      arps = expect(@dobj.add_collection_relationship_params('druid:mm111nn2222')).to eq(exp2)
-    end
-
-  end
-
-  ####################
-
   describe "file staging" do
-
     it "should be able to copy stageable items successfully" do
       @dobj.druid = @druid
 
@@ -422,18 +367,20 @@ describe PreAssembly::DigitalObject do
   ####################
 
   describe "content metadata generated from object tag in DOR if present and overriding is allowed" do
+    let(:object_client) { instance_double(Dor::Services::Client::Object, find: item) }
+    let(:item) { instance_double(Cocina::Models::DRO, type: Cocina::Models::Vocab.object) }
 
-    before(:each) do
+    before do
+      allow(Dor::Services::Client).to receive(:object).and_return(object_client)
       @dobj.druid = @druid
       @dobj.content_md_creation[:style]='default'
       @dobj.project_style[:content_structure]='simple_image' # this is the default
       @dobj.project_style[:content_tag_override]=true        # this allows override of content structure
-      allow(@dobj).to receive(:content_type_tag).and_return('File')       # this is what the object tag says, so we should get the file type out
       @dobj.project_style[:should_register]=false
       @dobj.file_attr=nil
       add_object_files('tif')
       add_object_files('jp2')
-      @dobj.create_content_metadata
+      @dobj.create_content_metadata  # this produces @dobj.content_md_xml as a side effect
       @exp_xml = <<-END.gsub(/^ {8}/, '')
         <?xml version="1.0"?>
         <contentMetadata type="file" objectId="gn330dv6119">
