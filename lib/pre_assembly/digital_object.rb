@@ -470,9 +470,7 @@ module PreAssembly
       return unless @init_assembly_wf
       log "    - initialize_assembly_workflow()"
 
-       with_retries(max_tries: Settings.num_attempts, rescue: Exception, handler: PreAssembly.retry_handler('INITIALIZE_ASSEMBLY_WORKFLOW', method(:log))) do
-          workflow_client.create_workflow_by_name(@druid.druid, 'assemblyWF', version: current_object_version)
-       end
+      workflow_client.create_workflow_by_name(@druid.druid, 'assemblyWF', version: current_object_version)
     end
 
     def workflow_client
