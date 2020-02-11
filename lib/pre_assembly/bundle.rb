@@ -149,7 +149,7 @@ module PreAssembly
       {
         :project_style=>{
           :content_structure=>[:simple_image,:simple_book,:book_as_image,:book_with_pdf,:file,:smpl,:'3d'],
-          :get_druid_from=>[:suri,:container,:container_barcode,:manifest,:druid_minter],
+          :get_druid_from=>[:suri,:container,:manifest,:druid_minter],
         },
         :content_md_creation=>{
           :style=>[:default,:filename,:dpg,:smpl,:salt,:none],
@@ -231,12 +231,7 @@ module PreAssembly
         validation_errors << "If should_register=true, then you must use a manifest." unless @object_discovery[:use_manifest] # you have to use a manifest if you want to register objects
         validation_errors << "If should_register=true, it does not make sense to have project_style:content_tag_override=true since objects are not registered yet." if @project_style[:content_tag_override]
       else  # if should_register=false, check some stuff
-        if @project_style[:get_druid_from] != :container_barcode
-          validation_errors << "The APO and SET DRUIDs should not be set if should_register = false." if (@apo_druid_id || @set_druid_id)  # APO and SET should not be set
-        else
-          validation_errors << "The APO DRUID must be set if project_style:get_druid_from = container_barcode." if @apo_druid_id.blank? # APO DRUID must be added for container_barcode projects
-          validation_errors << "The SET DRUID should not be set if project_style:get_druid_from = container_barcode." if @set_druid_id # SET DRUID must not be set for container_barcode projects
-        end
+        validation_errors << "The APO and SET DRUIDs should not be set if should_register = false." if (@apo_druid_id || @set_druid_id)  # APO and SET should not be set
         validation_errors << "get_druid_from: 'suri' is only valid if should_register = true." if @project_style[:get_druid_from]==:suri # can't use SURI to get druid
         validation_errors << "get_druid_from: 'manifest' is only valid if use_manifest = true." if @project_style[:get_druid_from]==:manifest && @object_discovery[:use_manifest] == false # can't use SURI to get druid
       end

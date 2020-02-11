@@ -29,7 +29,7 @@ progress_log_file: ~                        # Optional - if left as nil a progre
 
 apo_druid_id:      'druid:aa111bb2222'     # Required if pre-assembly is registering
                                            # the objects.  Include druid prefix.
-                                           # NOTE: only valid if should_register = true OR get_druid_from = container_barcode
+                                           # NOTE: only valid if should_register = true
 
 set_druid_id:      'druid:yy888xx9999'     # If supplied, pre-assembly will associate
                                            # the object with a set in Dor. Include druid prefix.
@@ -84,9 +84,6 @@ project_style:
 
                   'container'          # Object is contained in a druid subdirectory
                                        # For example: "aa111bb2222".
-
-                  'container_barcode'  # Object is contained in a barcode subdirectory.  Druid will be fetched from a service.
-                                       # For example: "36105115575834".
 
                   'manifest'           # Object's druid is in a column in the manifest called "druid".  Only used for should_register=false and use_manifest=true
                                        #   when you want to use a manifest for descriptive metadata, and when the folder container is not named by druid
@@ -156,7 +153,7 @@ stageable_discovery:
 
   # Option 1: If you set 'use_container' to true, this will simply stage the entire object directory that was matched with the glob above.
   # This is not a valid option if your object is contained in a folder named by druid or barcode - preassembly will give an error message if you set
-  # 'use_container' to true and the 'get_druid_from' parameter to 'container' or 'container_barcode'.
+  # 'use_container' to true and the 'get_druid_from' parameter to 'container'.
 
   use_container: true    # If true , set glob and regex to nil below.
                  false   # If false, use glob and regex below.

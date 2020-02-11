@@ -48,40 +48,13 @@ describe PreAssembly::DigitalObject do
 
   ####################
 
-  describe "determining druid: get_pid_from_container_barcode()" do
-
-    before(:each) do
-      @druids = %w(druid:aa00aaa0000 druid:cc11bbb1111 druid:dd22eee2222)
-      apos = %w(druid:aa00aaa9999 druid:bb00bbb9999 druid:cc00ccc9999)
-      apos = apos.map { |a| double('apo', :pid => a) }
-      @barcode = '36105115575834'
-      allow(@dobj).to receive(:container_basename).and_return @barcode
-      allow(@dobj).to receive(:query_dor_by_barcode).and_return @druids
-      allow(@dobj).to receive(:get_dor_item_apos).and_return apos
-      @stubbed_return_vals = @druids.map { false }
-    end
-
+  describe "#get_pid_from_druid_minter" do
     it "should return DruidMinter.next if get_druid_from=druid_minter" do
       exp = PreAssembly::DruidMinter.current
       @dobj.project_style[:get_druid_from] = :druid_minter
       expect(@dobj).not_to receive :container_basename
       expect(@dobj.get_pid_from_druid_minter).to eq(exp.next)
     end
-
-    it "should return nil whether there are no matches" do
-      allow(@dobj).to receive(:apo_matches_exactly_one?).and_return *@stubbed_return_vals
-      expect(@dobj.get_pid_from_container_barcode).to eq(nil)
-    end
-
-    it "should return the druid of the object with the matching APO" do
-      @druids.each_with_index do |druid, i|
-        @stubbed_return_vals[i] = true
-        allow(@dobj).to receive(:apo_matches_exactly_one?).and_return *@stubbed_return_vals
-        expect(@dobj.get_pid_from_container_barcode).to eq(@druids[i])
-        @stubbed_return_vals[i] = false
-      end
-    end
-
   end
 
   ####################

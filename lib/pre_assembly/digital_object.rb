@@ -167,26 +167,6 @@ module PreAssembly
       "druid:#{container_basename}"
     end
 
-    def get_pid_from_container_barcode
-      barcode = container_basename
-      pids    = query_dor_by_barcode(barcode)
-      pids.each do |pid|
-        @pid=pid
-        apo_pids = get_dor_item_apos.map { |apo| apo.pid }
-        return pid if apo_matches_exactly_one?(apo_pids)
-      end
-      nil
-    end
-
-    def query_dor_by_barcode(barcode)
-      Dor::SearchService.query_by_id :barcode => barcode
-    end
-
-    def get_dor_item_apos(pid)
-      get_dor_object
-      @dor_object.nil? ? [] : @dor_object.admin_policy_object
-    end
-
     def get_dor_object
       begin
         @dor_object ||= Dor::Item.find pid
