@@ -137,7 +137,7 @@ GEM
       solrizer (~> 3.0)
       stanford-mods (>= 2.3.1)
       stanford-mods-normalizer (~> 0.1)
-    dor-services-client (4.13.1)
+    dor-services-client (4.14.0)
       activesupport (>= 4.2, < 7)
       cocina-models (~> 0.22.2)
       deprecation
@@ -153,7 +153,7 @@ GEM
       zeitwerk (~> 2.1)
     druid-tools (2.1.0)
       deprecation
-    dry-configurable (0.11.0)
+    dry-configurable (0.11.3)
       concurrent-ruby (~> 1.0)
       dry-core (~> 0.4, >= 0.4.7)
       dry-equalizer (~> 0.2)
