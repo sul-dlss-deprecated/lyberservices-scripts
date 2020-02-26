@@ -1,3 +1,4 @@
+# https://github.com/sul-dlss-deprecated/dir_validator  <-- it's not maintained
 require 'dir_validator'
 
 module PreAssembly
@@ -21,4 +22,3 @@ module PreAssembly
   end
 
 end
-
