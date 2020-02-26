@@ -6,7 +6,6 @@ gem 'csv-mapper'
 gem 'equivalent-xml'
 gem 'nokogiri'
 gem 'rake'
-# gem 'rdf' # seems we don't need this??
 gem 'rest-client'
 gem 'retries'
 gem 'roo'
@@ -15,13 +14,12 @@ gem 'honeybadger', '~> 3.1'
 # Stanford gems
 gem 'assembly-image'
 gem 'assembly-objectfile', '~> 1.9'
-gem 'dir_validator'
+# https://github.com/sul-dlss-deprecated/dir_validator  <-- it's not maintained
+# gem 'dir_validator' # for possible use, per spec/test_data/project_config_fles/local_dev_rumsey.rb
 gem 'dor-services', '~> 8'
 gem 'dor-services-client'
 gem 'dor-workflow-client'
 gem 'druid-tools'
-gem 'harvestdor'
-gem 'modsulator'
 gem 'stanford-mods'
 gem 'config'
 gem 'pry-byebug' # helpful for debugging problems

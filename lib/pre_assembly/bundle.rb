@@ -359,6 +359,8 @@ module PreAssembly
     def run_dir_validation_code
       # Require the DirValidator code, run it, and return the validator.
       require @validate_bundle_dir[:code]
+      # 2020-02-26 there is no such thing as PreAssembly.validate_bundle_directory
+      #   except in spec/test_data/project_config_fles/local_dev_rumsey.rb
       dv = PreAssembly.validate_bundle_directory(@bundle_dir)
       dv
     end

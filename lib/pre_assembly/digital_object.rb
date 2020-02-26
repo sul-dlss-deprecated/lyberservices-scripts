@@ -1,6 +1,5 @@
 # encoding: UTF-8
 require 'dor/services/client'
-require 'modsulator'
 
 module PreAssembly
 
