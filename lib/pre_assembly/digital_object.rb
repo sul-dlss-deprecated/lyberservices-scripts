@@ -454,6 +454,7 @@ module PreAssembly
     end
 
     def start_accession
+      return unless @init_assembly_wf
       version_params =
         {
           significance: 'major',
