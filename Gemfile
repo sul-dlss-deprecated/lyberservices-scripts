@@ -3,13 +3,19 @@ source 'https://rubygems.org'
 gem 'actionmailer', '~> 5.2'
 gem 'actionpack', '~> 5.2'
 gem 'csv-mapper'
+gem 'config'
 gem 'equivalent-xml'
+gem 'honeybadger', '~> 3.1'
+# iso-639 0.3.0 isn't compatible with ruby 2.5.  This declaration can be dropped when we upgrade to ruby 2.6
+# see https://github.com/alphabetum/iso-639/issues/12
+# iso-639 is used by dor-services gem via stanford-mods gem
+gem 'iso-639', '~> 0.2.10'
 gem 'nokogiri'
+gem 'pry-byebug' # helpful for debugging problems
 gem 'rake'
 gem 'rest-client'
 gem 'retries'
 gem 'roo'
-gem 'honeybadger', '~> 3.1'
 
 # Stanford gems
 gem 'assembly-image'
@@ -20,9 +26,6 @@ gem 'dor-services', '~> 8'
 gem 'dor-services-client'
 gem 'dor-workflow-client'
 gem 'druid-tools'
-gem 'stanford-mods'
-gem 'config'
-gem 'pry-byebug' # helpful for debugging problems
 
 group :test do
   gem 'coveralls', require: false
