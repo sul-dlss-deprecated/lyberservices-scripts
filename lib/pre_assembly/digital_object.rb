@@ -461,7 +461,7 @@ module PreAssembly
           description: 'lyberservices-scripts re-accession',
           opening_user_name: 'lyberservices-scripts'
         }
-      object_client.accession(version_params)
+      object_client.accession.start(version_params)
     end
   end
 end

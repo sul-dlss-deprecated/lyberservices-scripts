@@ -19,7 +19,7 @@ gem 'assembly-objectfile', '~> 1.9'
 # https://github.com/sul-dlss-deprecated/dir_validator  <-- it's not maintained
 # gem 'dir_validator' # for possible use, per spec/test_data/project_config_fles/local_dev_rumsey.rb
 gem 'dor-services', '~> 8'
-gem 'dor-services-client'
+gem 'dor-services-client', '~> 4.17'
 gem 'dor-workflow-client'
 gem 'druid-tools'
 

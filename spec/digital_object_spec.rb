@@ -778,10 +778,11 @@ describe PreAssembly::DigitalObject do
       it 'does not start accessioning' do
         dor_services_client_object_version = instance_double(Dor::Services::Client::ObjectVersion, open: true, close: true)
         allow(dor_services_client_object_version).to receive(:current).and_return(5)
-        dor_services_client_object = instance_double(Dor::Services::Client::Object, version: dor_services_client_object_version)
+        accession_object = instance_double(Dor::Services::Client::Accession, start: true)
+        dor_services_client_object = instance_double(Dor::Services::Client::Object, version: dor_services_client_object_version, accession: accession_object)
         allow(Dor::Services::Client).to receive(:object).and_return(dor_services_client_object)
         allow(@dobj).to receive(:object_client).and_return(dor_services_client_object)
-        expect(dor_services_client_object).not_to receive(:accession)
+        expect(accession_object).not_to receive(:start)
         @dobj.send(:start_accession)
       end
     end
@@ -794,10 +795,11 @@ describe PreAssembly::DigitalObject do
       it 'starts accessioning' do
         dor_services_client_object_version = instance_double(Dor::Services::Client::ObjectVersion, open: true, close: true)
         allow(dor_services_client_object_version).to receive(:current).and_return(5)
-        dor_services_client_object = instance_double(Dor::Services::Client::Object, version: dor_services_client_object_version)
+        accession_object = instance_double(Dor::Services::Client::Accession, start: true)
+        dor_services_client_object = instance_double(Dor::Services::Client::Object, version: dor_services_client_object_version, accession: accession_object)
         allow(Dor::Services::Client).to receive(:object).and_return(dor_services_client_object)
         allow(@dobj).to receive(:object_client).and_return(dor_services_client_object)
-        expect(dor_services_client_object).to receive(:accession)
+        expect(accession_object).to receive(:start)
         @dobj.send(:start_accession)
       end
     end
