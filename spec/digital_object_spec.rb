@@ -763,24 +763,7 @@ describe PreAssembly::DigitalObject do
     end
   end
 
-  describe '#create_new_version' do
-    let(:dor_services_client_object_version) { instance_double(Dor::Services::Client::ObjectVersion, open: true, close: true) }
-    let(:dor_services_client_object) { instance_double(Dor::Services::Client::Object, version: dor_services_client_object_version) }
-    let(:version_options) { { significance: 'major', description: 'lyberservices-scripts re-accession', opening_user_name: 'lyberservices-scripts' } }
-
-    before do
-      @dobj.druid = @druid
-      allow(Dor::Services::Client).to receive(:object).and_return(dor_services_client_object)
-    end
-
-    it 'opens and closes an object version' do
-      expect(dor_services_client_object_version).to receive(:open).with(**version_options)
-      expect(dor_services_client_object_version).to receive(:close).with(start_accession: false)
-      @dobj.send(:create_new_version)
-    end
-  end
-
-  describe '#initialize_assembly_workflow' do
+  describe '#start_accession' do
     before do
       allow(@dobj).to receive(:druid).and_return(@dru)
       @dobj.init_assembly_wf = true
@@ -792,39 +775,48 @@ describe PreAssembly::DigitalObject do
         @dobj.init_assembly_wf = false
       end
 
-      it 'skips initializing workflow' do
-        workflow_client = instance_double(Dor::Workflow::Client)
-        allow(@dobj).to receive(:workflow_client).and_return(workflow_client)
-        expect(workflow_client).not_to receive(:create_workflow_by_name)
-        @dobj.send(:initialize_assembly_workflow)
+      it 'does not start accessioning' do
+        dor_services_client_object_version = instance_double(Dor::Services::Client::ObjectVersion, open: true, close: true)
+        allow(dor_services_client_object_version).to receive(:current).and_return(5)
+        accession_object = instance_double(Dor::Services::Client::Accession, start: true)
+        dor_services_client_object = instance_double(Dor::Services::Client::Object, version: dor_services_client_object_version, accession: accession_object)
+        allow(Dor::Services::Client).to receive(:object).and_return(dor_services_client_object)
+        allow(@dobj).to receive(:object_client).and_return(dor_services_client_object)
+        expect(accession_object).not_to receive(:start)
+        @dobj.send(:start_accession)
       end
     end
 
     context 'when @init_assembly_wf is true' do
       before do
-        dor_services_client_object_version = instance_double(Dor::Services::Client::ObjectVersion, open: true, close: true)
-        allow(dor_services_client_object_version).to receive(:current).and_return(5)
-        dor_services_client_object = instance_double(Dor::Services::Client::Object, version: dor_services_client_object_version)
-        allow(Dor::Services::Client).to receive(:object).and_return(dor_services_client_object)
+        @dobj.init_assembly_wf = true
       end
 
-      it 'starts the assembly workflow' do
-        workflow_client = instance_double(Dor::Workflow::Client)
-        allow(@dobj).to receive(:workflow_client).and_return(workflow_client)
-        expect(workflow_client).to receive(:create_workflow_by_name).with(@pid, 'assemblyWF', version: 5)
-        @dobj.send(:initialize_assembly_workflow)
+      it 'starts accessioning' do
+        dor_services_client_object_version = instance_double(Dor::Services::Client::ObjectVersion, open: true, close: true)
+        allow(dor_services_client_object_version).to receive(:current).and_return(5)
+        accession_object = instance_double(Dor::Services::Client::Accession, start: true)
+        dor_services_client_object = instance_double(Dor::Services::Client::Object, version: dor_services_client_object_version, accession: accession_object)
+        allow(Dor::Services::Client).to receive(:object).and_return(dor_services_client_object)
+        allow(@dobj).to receive(:object_client).and_return(dor_services_client_object)
+        expect(accession_object).to receive(:start)
+        @dobj.send(:start_accession)
       end
     end
 
     context 'when Dor::Workflow::Client raises' do
       before do
-        workflow_client = instance_double(Dor::Workflow::Client)
-        allow(workflow_client).to receive(:create_workflow_by_name).and_raise(StandardError)
-        allow(@dobj).to receive(:workflow_client).and_return(workflow_client)
+        @dobj.init_assembly_wf = true
       end
 
       it 'raises an exception' do
-        expect { @dobj.send(:initialize_assembly_workflow) }.to raise_error(StandardError)
+        dor_services_client_object_version = instance_double(Dor::Services::Client::ObjectVersion, open: true, close: true)
+        allow(dor_services_client_object_version).to receive(:current).and_return(5)
+        dor_services_client_object = instance_double(Dor::Services::Client::Object, version: dor_services_client_object_version)
+        allow(Dor::Services::Client).to receive(:object).and_return(dor_services_client_object)
+        allow(@dobj).to receive(:object_client).and_return(dor_services_client_object)
+        allow(dor_services_client_object).to receive(:accession).and_raise(StandardError)
+        expect { @dobj.send(:start_accession) }.to raise_error(StandardError)
       end
     end
   end

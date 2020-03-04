@@ -137,8 +137,7 @@ module PreAssembly
       generate_content_metadata unless @content_md_creation[:style].to_s == 'none'
       generate_technical_metadata
       generate_desc_metadata
-      create_new_version if openable?
-      initialize_assembly_workflow
+      start_accession
       log "    - pre_assemble(#{@pid}) finished"
     end
 
@@ -442,38 +441,27 @@ module PreAssembly
       version_client.openable?
     end
 
+    def object_client
+      @object_client ||= Dor::Services::Client.object(@druid.druid)
+    end
+
     def version_client
-      @version_client ||= Dor::Services::Client.object(@druid.druid).version
+      object_client.version
     end
 
     def current_object_version
       @current_object_version ||= version_client.current.to_i
     end
 
-    # When reaccessioning, we need to first open and close a version without kicking off accessionWF
-    def create_new_version
-      version_client.open(
-        significance: 'major',
-        description: 'lyberservices-scripts re-accession',
-        opening_user_name: 'lyberservices-scripts'
-      )
-      version_client.close(start_accession: false)
-    end
-
-    ####
-    # Initialize the assembly workflow.
-    ####
-
-    # Call web service to add assemblyWF to the object in DOR.
-    def initialize_assembly_workflow
+    def start_accession
       return unless @init_assembly_wf
-      log "    - initialize_assembly_workflow()"
-
-      workflow_client.create_workflow_by_name(@druid.druid, 'assemblyWF', version: current_object_version)
-    end
-
-    def workflow_client
-      @workflow_client || Dor::Workflow::Client.new(url: Settings.workflow_url)
+      version_params =
+        {
+          significance: 'major',
+          description: 'lyberservices-scripts re-accession',
+          opening_user_name: 'lyberservices-scripts'
+        }
+      object_client.accession.start(version_params)
     end
   end
 end
