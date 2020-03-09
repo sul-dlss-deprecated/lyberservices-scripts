@@ -133,7 +133,7 @@ GEM
       solrizer (~> 3.0)
       stanford-mods (>= 2.3.1)
       stanford-mods-normalizer (~> 0.1)
-    dor-services-client (4.17.0)
+    dor-services-client (4.17.1)
       activesupport (>= 4.2, < 7)
       cocina-models (~> 0.26.0)
       deprecation
@@ -361,7 +361,7 @@ GEM
       nokogiri
       stomp
       xml-simple
-    sshkit (1.20.0)
+    sshkit (1.21.0)
       net-scp (>= 1.1.2)
       net-ssh (>= 2.8.0)
     stanford-mods (2.6.1)
@@ -387,7 +387,7 @@ GEM
     unf_ext (0.0.7.6)
     unicode-display_width (1.6.1)
     xml-simple (1.1.5)
-    zeitwerk (2.2.2)
+    zeitwerk (2.3.0)
 
 PLATFORMS
   ruby
