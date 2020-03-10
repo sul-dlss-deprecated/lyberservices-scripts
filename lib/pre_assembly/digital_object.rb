@@ -33,7 +33,6 @@ module PreAssembly
     OTHER_ACCESSORS = [
       :pid,
       :druid,
-      :dor_object,
       :label,
       :manifest_row,
       :source_id,
@@ -62,7 +61,6 @@ module PreAssembly
     def setup
       @pid                 = ''
       @druid               = nil
-      @dor_object          = nil
       @label               = Settings.default_label
       @source_id           = nil
       @manifest_row        = nil
@@ -88,15 +86,25 @@ module PreAssembly
       end
     end
 
+    # map the object type to content metadata creation styles supported by the assembly-objectfile gem
+    # @return [Symbol] a metadata creation styles supported by the assembly-objectfile gem
     def content_md_creation_style
+      # if this object needs to be registered or has no content type tag for a registered object, use the default set in the YAML file
+      return default_content_md_creation_style if @project_style[:should_register] || !@project_style[:content_tag_override]
+
+      # if the object is already registered and there is a object_type and we allow overrides, use it if we know what it means (else use the default)
       # set this object's content_md_creation_style
-      if (@project_style[:should_register]) || (!@project_style[:content_tag_override]) || (@project_style[:content_tag_override] && content_type_tag.blank?) # if this object needs to be registered or has no content type tag for a registered object, use the default set in the YAML file
-        default_content_md_creation_style
-      else # if the object is already registered and there is a content type tag and we allow overrides, use it if we know what it means (else use the default)
-        CONTENT_TYPE_TAG_MAPPING[content_type_tag] || default_content_md_creation_style
-      end
+      {
+        Cocina::Models::Vocab.image => :simple_image,
+        Cocina::Models::Vocab.object => :file,
+        Cocina::Models::Vocab.book => :simple_book,
+        Cocina::Models::Vocab.manuscript => :simple_book,
+        Cocina::Models::Vocab.map => :map,
+        Cocina::Models::Vocab.three_dimensional => :'3d'
+      }.fetch(object_type, default_content_md_creation_style)
     end
 
+    # @return [Symbol]
     def default_content_md_creation_style
        @project_style[:content_structure].to_sym
     end
@@ -132,7 +140,6 @@ module PreAssembly
       determine_druid
 
       register
-      add_dor_object_to_set
       stage_files
       generate_content_metadata unless @content_md_creation[:style].to_s == 'none'
       generate_technical_metadata
@@ -165,17 +172,15 @@ module PreAssembly
       "druid:#{container_basename}"
     end
 
-    def get_dor_object
-      begin
-        @dor_object ||= Dor::Item.find pid
-      rescue ActiveFedora::ObjectNotFoundError
-        @dor_object = nil
-      end
+    # @return [String] one of the values from Cocina::Models::DRO::TYPES
+    def object_type
+      object_client.find.type
+    rescue Dor::Services::Client::NotFoundResponse
+      ''
     end
 
-    def content_type_tag
-      get_dor_object
-      @dor_object.nil? ? "" : @dor_object.content_type_tag
+    def object_client
+      @object_client ||= Dor::Services::Client.object(pid)
     end
 
     def apo_matches_exactly_one?(apo_pids)
@@ -196,7 +201,7 @@ module PreAssembly
     def register
       return unless @project_style[:should_register]
       log "    - register(#{@pid})"
-      @dor_object          = register_in_dor(registration_params)
+      register_in_dor(registration_params)
     end
 
     def register_in_dor(params)
@@ -233,35 +238,14 @@ module PreAssembly
       tags=["Project : #{@project_name}"]
       tags << @apply_tag unless @apply_tag.blank?
       {
-        :object_type  => 'item',
-        :admin_policy => @apo_druid_id,
-        :source_id    => { @project_name => @source_id },
-        :pid          => @pid,
-        :label        => @label.blank? ? Settings.default_label : @label,
-        :tag          => tags,
+        :object_type   => 'item',
+        :admin_policy  => @apo_druid_id,
+        :source_id     => { @project_name => @source_id },
+        :collection_id => @set_druid_id,
+        :pid           => @pid,
+        :label         => @label.blank? ? Settings.default_label : @label,
+        :tag           => tags,
       }
-    end
-
-    def add_dor_object_to_set
-      # Add the object to a set (a sub-collection).
-      return unless @set_druid_id && @project_style[:should_register]
-      log "    - add_dor_object_to_set(#{@set_druid_id})"
-
-      with_retries(max_tries: Settings.num_attempts, rescue: Exception, handler: PreAssembly.retry_handler('ADD_DOR_OBJECT_TO_SET', method(:log))) do
-        Array(@set_druid_id).each do |druid|
-          @dor_object.add_relationship *add_member_relationship_params(druid)
-          @dor_object.add_relationship *add_collection_relationship_params(druid)
-        end
-        raise PreAssembly::UnknownError unless @dor_object.save
-      end
-    end
-
-    def add_member_relationship_params(druid)
-      [:is_member_of, "info:fedora/#{druid}"]
-    end
-
-    def add_collection_relationship_params(druid)
-      [:is_member_of_collection, "info:fedora/#{druid}"]
     end
 
     ####

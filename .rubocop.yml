@@ -4,3 +4,7 @@ inherit_from: .rubocop_todo.yml
 Layout/SpaceBeforeBlockBraces:
   Exclude:
     - 'spec/**/*_spec.rb'
+
+Metrics/BlockLength:
+  Exclude:
+    - 'spec/**/*_spec.rb'
