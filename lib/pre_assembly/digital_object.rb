@@ -425,10 +425,6 @@ module PreAssembly
       version_client.openable?
     end
 
-    def object_client
-      @object_client ||= Dor::Services::Client.object(@druid.druid)
-    end
-
     def version_client
       object_client.version
     end
