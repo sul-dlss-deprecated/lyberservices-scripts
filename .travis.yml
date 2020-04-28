@@ -14,6 +14,7 @@ env:
 rvm:
   - 2.5.3 # default deployed
   - 2.6.4
+  - 2.7.1
 
 before_install:
   # Update to latest rubygems -- for ruby 2.5.3
