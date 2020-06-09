@@ -154,6 +154,8 @@ module PreAssembly
     ####
 
     def determine_druid
+      # NOTE:  PR https://github.com/sul-dlss/lyberservices-scripts/pull/42 removed the option to get it from suri;
+      #   if needed probably need to retool slightly to use registration service instead
       k = @project_style[:get_druid_from]
       log "    - determine_druid(#{k})"
       @pid   = method("get_pid_from_#{k}").call
